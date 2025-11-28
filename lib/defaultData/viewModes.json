@@ -1,0 +1,15 @@
+{
+  "grid": {
+    "name": "Grid View",
+    "icon": "grid",
+    "description": "View files and folders in a grid layout",
+    "defaultColumns": 4
+  },
+  "list": {
+    "name": "List View",
+    "icon": "list",
+    "description": "View files and folders in a detailed list",
+    "defaultColumns": ["name", "owner", "modified", "size"]
+  }
+}
+

@@ -1,0 +1,44 @@
+{
+  "free": {
+    "name": "Free",
+    "storageLimit": 15728640,
+    "storageLimitGB": 15,
+    "price": 0,
+    "features": [
+      "15 GB storage",
+      "Basic file sharing",
+      "Mobile app access"
+    ]
+  },
+  "basic": {
+    "name": "Basic",
+    "storageLimit": 107374182400,
+    "storageLimitGB": 100,
+    "price": 1.99,
+    "billingPeriod": "month",
+    "features": [
+      "100 GB storage",
+      "Enhanced file sharing",
+      "Priority support",
+      "Mobile app access",
+      "Advanced search"
+    ]
+  },
+  "premium": {
+    "name": "Premium",
+    "storageLimit": 1073741824000,
+    "storageLimitGB": 1000,
+    "price": 9.99,
+    "billingPeriod": "month",
+    "features": [
+      "1 TB storage",
+      "Advanced sharing controls",
+      "24/7 priority support",
+      "Mobile app access",
+      "Advanced search",
+      "Version history",
+      "Advanced security"
+    ]
+  }
+}
+

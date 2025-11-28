@@ -1,0 +1,23 @@
+{
+  "name": {
+    "label": "Name",
+    "asc": "A-Z",
+    "desc": "Z-A"
+  },
+  "modified": {
+    "label": "Last Modified",
+    "asc": "Oldest first",
+    "desc": "Newest first"
+  },
+  "size": {
+    "label": "Size",
+    "asc": "Smallest first",
+    "desc": "Largest first"
+  },
+  "type": {
+    "label": "Type",
+    "asc": "Type A-Z",
+    "desc": "Type Z-A"
+  }
+}
+

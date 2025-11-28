@@ -1,0 +1,101 @@
+{
+  "document": {
+    "extensions": [".doc", ".docx", ".pdf", ".txt", ".rtf", ".odt"],
+    "mimeTypes": [
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/pdf",
+      "text/plain",
+      "application/rtf",
+      "application/vnd.oasis.opendocument.text"
+    ],
+    "icon": "document",
+    "color": "#4285F4"
+  },
+  "spreadsheet": {
+    "extensions": [".xls", ".xlsx", ".csv", ".ods"],
+    "mimeTypes": [
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/csv",
+      "application/vnd.oasis.opendocument.spreadsheet"
+    ],
+    "icon": "spreadsheet",
+    "color": "#0F9D58"
+  },
+  "presentation": {
+    "extensions": [".ppt", ".pptx", ".odp"],
+    "mimeTypes": [
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.oasis.opendocument.presentation"
+    ],
+    "icon": "presentation",
+    "color": "#F4B400"
+  },
+  "image": {
+    "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp"],
+    "mimeTypes": [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/bmp",
+      "image/svg+xml",
+      "image/webp"
+    ],
+    "icon": "image",
+    "color": "#EA4335"
+  },
+  "video": {
+    "extensions": [".mp4", ".avi", ".mov", ".wmv", ".flv", ".webm"],
+    "mimeTypes": [
+      "video/mp4",
+      "video/x-msvideo",
+      "video/quicktime",
+      "video/x-ms-wmv",
+      "video/x-flv",
+      "video/webm"
+    ],
+    "icon": "video",
+    "color": "#9C27B0"
+  },
+  "audio": {
+    "extensions": [".mp3", ".wav", ".flac", ".aac", ".ogg"],
+    "mimeTypes": [
+      "audio/mpeg",
+      "audio/wav",
+      "audio/flac",
+      "audio/aac",
+      "audio/ogg"
+    ],
+    "icon": "audio",
+    "color": "#FF9800"
+  },
+  "archive": {
+    "extensions": [".zip", ".rar", ".7z", ".tar", ".gz"],
+    "mimeTypes": [
+      "application/zip",
+      "application/x-rar-compressed",
+      "application/x-7z-compressed",
+      "application/x-tar",
+      "application/gzip"
+    ],
+    "icon": "archive",
+    "color": "#795548"
+  },
+  "code": {
+    "extensions": [".js", ".ts", ".jsx", ".tsx", ".py", ".java", ".cpp", ".html", ".css"],
+    "mimeTypes": [
+      "application/javascript",
+      "application/typescript",
+      "text/javascript",
+      "text/x-python",
+      "text/x-java-source",
+      "text/html",
+      "text/css"
+    ],
+    "icon": "code",
+    "color": "#607D8B"
+  }
+}
+

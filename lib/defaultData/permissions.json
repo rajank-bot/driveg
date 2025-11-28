@@ -1,0 +1,61 @@
+{
+  "roles": {
+    "viewer": {
+      "name": "Viewer",
+      "description": "Can view files",
+      "permissions": {
+        "canView": true,
+        "canEdit": false,
+        "canDelete": false,
+        "canShare": false,
+        "canDownload": true
+      }
+    },
+    "commenter": {
+      "name": "Commenter",
+      "description": "Can view and comment on files",
+      "permissions": {
+        "canView": true,
+        "canEdit": false,
+        "canDelete": false,
+        "canShare": false,
+        "canDownload": true,
+        "canComment": true
+      }
+    },
+    "editor": {
+      "name": "Editor",
+      "description": "Can view, edit, and delete files",
+      "permissions": {
+        "canView": true,
+        "canEdit": true,
+        "canDelete": true,
+        "canShare": true,
+        "canDownload": true,
+        "canComment": true
+      }
+    },
+    "owner": {
+      "name": "Owner",
+      "description": "Full control over files",
+      "permissions": {
+        "canView": true,
+        "canEdit": true,
+        "canDelete": true,
+        "canShare": true,
+        "canDownload": true,
+        "canComment": true,
+        "canManagePermissions": true,
+        "canTransferOwnership": true
+      }
+    }
+  },
+  "defaultPermissions": {
+    "canView": true,
+    "canEdit": false,
+    "canDelete": false,
+    "canShare": false,
+    "canDownload": true
+  }
+}
+
