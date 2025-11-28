@@ -12,22 +12,23 @@ import {
 
 export interface SidebarItem {
   label: string
+  path: string
   icon: React.ComponentType<{ className?: string }>
-  active?: boolean
   expandable?: boolean
+  children?: SidebarItem[] // Future: sub-items for expandable items
 }
 
 export const SIDEBAR_ITEMS: SidebarItem[] = [
-  { label: 'Home', icon: HomeIcon, active: true },
-  { label: 'Activity', icon: BellIcon },
-  { label: 'Workspaces', icon: CpuChipIcon },
-  { label: 'My Drive', icon: FolderIcon, expandable: true },
-  { label: 'Shared drives', icon: UsersIcon, expandable: true },
-  { label: 'Shared with me', icon: UsersIcon },
-  { label: 'Recent', icon: ClockIcon },
-  { label: 'Starred', icon: StarIcon },
-  { label: 'Spam', icon: ShieldExclamationIcon },
-  { label: 'Trash', icon: TrashIcon },
-  { label: 'Storage', icon: FolderIcon },
+  { label: 'Home', path: '/drive/home', icon: HomeIcon },
+  { label: 'Activity', path: '/drive/activity', icon: BellIcon },
+  { label: 'Workspaces', path: '/drive/workspaces', icon: CpuChipIcon },
+  { label: 'My Drive', path: '/drive/my-drive', icon: FolderIcon, expandable: true },
+  { label: 'Shared drives', path: '/drive/shared-drives', icon: UsersIcon, expandable: true },
+  { label: 'Shared with me', path: '/drive/shared-with-me', icon: UsersIcon },
+  { label: 'Recent', path: '/drive/recent', icon: ClockIcon },
+  { label: 'Starred', path: '/drive/starred', icon: StarIcon },
+  { label: 'Spam', path: '/drive/spam', icon: ShieldExclamationIcon },
+  { label: 'Trash', path: '/drive/trash', icon: TrashIcon },
+  { label: 'Storage', path: '/drive/storage', icon: FolderIcon },
 ]
 
