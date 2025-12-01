@@ -66,7 +66,7 @@ export default function NavItem({
       href={path}
       onClick={handleClick}
       className={`flex items-center gap-3 px-3 py-2 rounded-full cursor-pointer transition-colors w-full text-left ${
-        isActive ? '' : 'hover:bg-gray-100'
+        isActive ? '' : 'hover:bg-gray-200'
       }`}
       style={
         isActive
