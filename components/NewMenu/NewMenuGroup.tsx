@@ -1,3 +1,4 @@
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import NewMenuItem from './NewMenuItem'
 import { NewMenuGroup as NewMenuGroupType } from '@/types/newMenuItems'
 
@@ -7,8 +8,8 @@ interface NewMenuGroupProps {
 
 export default function NewMenuGroup({ group }: NewMenuGroupProps) {
   return (
-    <div>
-      {group.items.map((item, index) => (
+    <>
+      {group.items.map((item) => (
         <NewMenuItem
           key={item.id}
           icon={item.icon}
@@ -19,9 +20,8 @@ export default function NewMenuGroup({ group }: NewMenuGroupProps) {
         />
       ))}
       {group.id === 'create-upload' && (
-        <div className="border-t border-gray-200 my-1" />
+        <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
       )}
-    </div>
+    </>
   )
 }
-

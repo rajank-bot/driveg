@@ -29,16 +29,32 @@ export default function Sidebar() {
       <SidebarSection />
 
       <nav className="flex-1 overflow-y-auto flex flex-col gap-1 px-3 py-2">
-        {SIDEBAR_ITEMS.map((item, index) => (
-          <div key={item.label}>
+        {SIDEBAR_ITEMS.map((item) => (
+          <div key={item.path}>
             <NavItem
               icon={item.icon}
               label={item.label}
-              active={item.active}
+              path={item.path}
               expandable={item.expandable}
               expanded={expandedItems.has(item.label)}
-              onClick={() => item.expandable && toggleExpand(item.label)}
+              onToggleExpand={() => toggleExpand(item.label)}
             />
+            {/* Render sub-items when expanded */}
+            {item.expandable &&
+              expandedItems.has(item.label) &&
+              item.children &&
+              item.children.length > 0 && (
+                <div className="ml-4 mt-1 flex flex-col gap-1">
+                  {item.children.map((child) => (
+                    <NavItem
+                      key={child.path}
+                      icon={child.icon}
+                      label={child.label}
+                      path={child.path}
+                    />
+                  ))}
+                </div>
+              )}
             {item.label === 'Storage' && (
               <div className="mt-2">
                 <StorageBar />
