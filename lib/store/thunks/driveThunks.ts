@@ -11,6 +11,7 @@ import {
   moveToTrash,
   restoreFromTrash,
 } from "../slices/driveSlice";
+import { deleteFile as deleteStoredFile } from "../../utils/fileStorage";
 
 // Fetch files
 export const fetchFiles = createAsyncThunk<
@@ -116,9 +117,15 @@ export const deleteFileThunk = createAsyncThunk<
     dispatch(setLoading(true));
     dispatch(setError(null));
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Delete from IndexedDB storage
+    try {
+      await deleteStoredFile(fileId);
+    } catch (storageError: any) {
+      console.warn("Failed to delete file from storage:", storageError);
+      // Continue with deletion even if storage cleanup fails
+    }
 
+    // Delete from Redux state
     dispatch(deleteFile(fileId));
     dispatch(setLoading(false));
     return fileId;
@@ -206,7 +213,7 @@ export const copyFiles = createAsyncThunk<
   FileItem[],
   { fileIds: string[]; newParentId: string | null },
   { dispatch: AppDispatch; state: RootState }
->("drive/copyFiles", async ({ fileIds, newParentId }, { dispatch, rejectWithValue }) => {
+>("drive/copyFiles", async ({ fileIds, newParentId }, { dispatch, getState, rejectWithValue }) => {
   try {
     dispatch(setLoading(true));
     dispatch(setError(null));
@@ -214,7 +221,7 @@ export const copyFiles = createAsyncThunk<
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const state = dispatch.getState();
+    const state = getState();
     const files = state.drive.files;
     const copiedFiles: FileItem[] = [];
 

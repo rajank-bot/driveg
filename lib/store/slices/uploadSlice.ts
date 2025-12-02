@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface UploadItem {
   id: string;
-  file: File;
+  file: File | null; // Can be null after upload completes to save memory
   name: string;
   size: number;
   progress: number;
@@ -10,6 +10,7 @@ export interface UploadItem {
   error?: string;
   parentId: string | null;
   uploadedFileId?: string;
+  mimeType?: string;
 }
 
 export interface UploadState {
@@ -46,6 +47,7 @@ export const uploadSlice = createSlice({
         upload.status = "completed";
         upload.progress = 100;
         upload.uploadedFileId = action.payload.fileId;
+        upload.file = null; // Clear file reference to save memory and avoid serialization issues
       }
       state.isUploading = state.uploads.some((u) => u.status === "uploading");
     },
