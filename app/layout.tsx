@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { StoreProvider } from '@/lib';
 
 export const metadata: Metadata = {
   title: 'DriveG',
@@ -13,7 +14,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen bg-gray-50">{children}</body>
+    
+      <body className="antialiased min-h-screen bg-gray-50"><StoreProvider>{children}</StoreProvider></body>
     </html>
   )
 }

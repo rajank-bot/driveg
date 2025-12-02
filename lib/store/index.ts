@@ -26,7 +26,7 @@ const rootReducer = {
   suggestions: suggestionsReducer,
 };
 
-export const makeStore = () => {
+export const makeStore = (): ReturnType<typeof configureStore> => {
   return configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
@@ -41,5 +41,7 @@ export const makeStore = () => {
 // Infer the type of makeStore
 export type AppStore = ReturnType<typeof makeStore>;
 // Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<ReturnType<typeof makeStore>["getState"]>;
+// Using a helper to avoid circular reference issues
+type StoreState = ReturnType<ReturnType<typeof makeStore>["getState"]>;
+export type RootState = StoreState;
 export type AppDispatch = ReturnType<typeof makeStore>["dispatch"];

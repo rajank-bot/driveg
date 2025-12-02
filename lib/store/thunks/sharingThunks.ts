@@ -73,8 +73,8 @@ export const updateSharePermission = createAsyncThunk<
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       // Get the current permission first to merge with updates
-      const state = getState();
-      const currentPermission = state.sharing.permissions.find(
+      const state = getState() as RootState;
+      const currentPermission = (state as any).sharing.permissions.find(
         (p: SharePermission) => p.id === permissionId
       );
 
@@ -188,8 +188,7 @@ export const updateShareLinkThunk = createAsyncThunk<
 
       // Get the current share link first to merge with updates
       const state = getState() as RootState;
-      // @ts-ignore - getState() returns unknown but we know it's RootState
-      const currentLink = state.sharing.shareLinks.find(
+      const currentLink = (state as any).sharing.shareLinks.find(
         (l: ShareLink) => l.id === linkData.id
       );
 
