@@ -1,8 +1,7 @@
 import { Middleware } from "@reduxjs/toolkit";
-import type { RootState } from "../index";
 
-export const windowSyncMiddleware: Middleware<{}, RootState> =
-  (store) => (next) => (action) => {
+export const windowSyncMiddleware: Middleware =
+  (store) => (next) => (action: any) => {
     const result = next(action);
     
     // Sync state across browser tabs/windows using BroadcastChannel
@@ -12,7 +11,7 @@ export const windowSyncMiddleware: Middleware<{}, RootState> =
         const state = store.getState();
         
         // Only sync non-internal actions
-        if (!action.type.startsWith("@@")) {
+        if (action.type && !action.type.startsWith("@@")) {
           channel.postMessage({
             type: "SYNC_STATE",
             state,

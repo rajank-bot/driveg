@@ -1,8 +1,7 @@
 import { Middleware } from "@reduxjs/toolkit";
-import type { RootState } from "../index";
 
-export const localStorageSync: Middleware<{}, RootState> =
-  (store) => (next) => (action) => {
+export const localStorageSync: Middleware =
+  (store) => (next) => (action: any) => {
     // Load state from localStorage on initialization
     if (typeof window !== "undefined" && action.type === "@@INIT") {
       try {

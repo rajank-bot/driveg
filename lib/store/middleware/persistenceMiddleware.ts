@@ -1,7 +1,6 @@
 import { Middleware } from "@reduxjs/toolkit";
-import type { RootState } from "../index";
 
-export const persistenceMiddleware: Middleware<{}, RootState> =
+export const persistenceMiddleware: Middleware =
   (store) => (next) => (action) => {
     const result = next(action);
     
@@ -9,7 +8,18 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
     if (typeof window !== "undefined") {
       const state = store.getState();
       try {
-        localStorage.setItem("redux-state", JSON.stringify(state));
+        // Create a serializable copy of state, excluding File objects
+        const serializableState = {
+          ...state,
+          upload: {
+            ...state.upload,
+            uploads: state.upload.uploads.map((upload: any) => ({
+              ...upload,
+              file: null, // Exclude File objects from serialization
+            })),
+          },
+        };
+        localStorage.setItem("redux-state", JSON.stringify(serializableState));
       } catch (error) {
         console.error("Error persisting state to localStorage:", error);
       }
