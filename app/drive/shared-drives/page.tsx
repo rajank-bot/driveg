@@ -45,6 +45,13 @@ export default function SharedDrivesPage() {
             files={files}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              owner: true,
+              modified: true,
+              size: true,
+              location: true,
+            }}
           />
         )
       ) : (

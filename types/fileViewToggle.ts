@@ -3,7 +3,7 @@ export type ViewMode = 'list' | 'grid'
 export interface FileItem {
   id: string
   name: string
-  type: 'file' | 'folder'
+  type: 'file' | 'folder' | 'image' | 'video' | 'audio' | 'document' | 'spreadsheet' | 'presentation' | 'pdf' | 'google-apps'
   mimeType?: string
   icon?: React.ComponentType<{ className?: string }>
   thumbnail?: string
@@ -19,6 +19,14 @@ export interface FileItem {
   fileSensitivity?: string
   starred?: boolean
   shared?: boolean
+  activity?: string
+  sharedBy?: {
+    name: string
+    avatar?: string
+  }
+  dateShared?: string
+  dateTrashed?: string
+  originalLocation?: string
 }
 
 export interface FileViewToggleProps {
@@ -32,6 +40,7 @@ export interface FileGridProps {
   onFileClick?: (file: FileItem) => void
   onFileAction?: (file: FileItem, action: string) => void
   className?: string
+  groupedFiles?: { [key: string]: FileItem[] }
 }
 
 export interface FileListProps {
@@ -46,6 +55,18 @@ export interface FileListProps {
     size?: boolean
     location?: boolean
     reason?: boolean
+    activity?: boolean
+    sharedBy?: boolean
+    dateShared?: boolean
+    dateTrashed?: boolean
+    originalLocation?: boolean
+  }
+  groupedFiles?: { [key: string]: FileItem[] }
+  customColumnHeaders?: {
+    reason?: string
+    activity?: string
+    modified?: string
+    [key: string]: string | undefined
   }
 }
 

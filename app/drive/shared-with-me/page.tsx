@@ -45,6 +45,11 @@ export default function SharedWithMePage() {
             files={files}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              sharedBy: true,
+              dateShared: true,
+            }}
           />
         )
       ) : (

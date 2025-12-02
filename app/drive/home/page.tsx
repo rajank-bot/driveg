@@ -196,7 +196,19 @@ export default function HomePage() {
         viewMode === 'grid' ? (
           <FileGrid files={sampleFiles} onFileClick={handleFileClick} onFileAction={handleFileAction} />
         ) : (
-          <FileList files={sampleFiles} onFileClick={handleFileClick} onFileAction={handleFileAction} />
+          <FileList 
+            files={sampleFiles} 
+            onFileClick={handleFileClick} 
+            onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              reason: true,
+              owner: true,
+              location: true,
+              modified: true,
+              size: true,
+            }}
+          />
         )
       ) : (
         <p className="text-gray-600">No files to display</p>
