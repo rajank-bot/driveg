@@ -2,12 +2,60 @@
 
 import { FileViewToggle, FileGrid, FileList, useViewMode } from '@/components/FileViewToggle'
 import type { FileItem } from '@/components/FileViewToggle'
+import { DocumentIcon } from '@heroicons/react/24/outline'
+import { ImageIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export default function StarredPage() {
   const [viewMode, setViewMode] = useViewMode('list')
   const [isHydrated, setIsHydrated] = useState(false)
-  const files: FileItem[] = []
+  const files: FileItem[] = [
+    {
+      id: '1',
+      name: 'File 1',
+      type: 'file',
+      mimeType: 'application/pdf',
+      icon: DocumentIcon,
+      owner: {
+        name: 'John Doe',
+      },
+      modifiedTime: new Date().toISOString(),
+      size: '100 KB',
+      location: 'Drive G',
+      reasonSuggested: 'You opened • 10:00 AM',
+      fileSensitivity: 'Standard',
+    },
+    {
+      id: '2',
+      name: 'File 2',
+      type: 'file',
+      mimeType: 'application/pdf',
+      icon: DocumentIcon,
+      owner: {
+        name: 'Jane Doe',
+      },
+      modifiedTime: new Date().toISOString(),
+      size: '100 KB',
+      location: 'Drive G',
+      reasonSuggested: 'You opened • 10:00 AM',
+      fileSensitivity: 'Standard',
+    },
+    {
+      id: '3',
+      name: 'File 3',
+      type: 'image',
+      mimeType: 'image/png',
+      icon: ImageIcon,
+      owner: {
+        name: 'John Doe',
+      },
+      modifiedTime: new Date().toISOString(),
+      size: '100 KB',
+      location: 'Drive G',
+      reasonSuggested: 'You opened • 10:00 AM',
+      fileSensitivity: 'Standard',
+    }
+  ]
 
   useEffect(() => {
     setIsHydrated(true)
@@ -45,6 +93,13 @@ export default function StarredPage() {
             files={files}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              owner: true,
+              modified: true,
+              size: true,
+              location: true,
+            }}
           />
         )
       ) : (

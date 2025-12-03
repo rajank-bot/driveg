@@ -62,6 +62,12 @@ export default function ActivityPage() {
             files={files}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              activity: true,
+              owner: true,
+              location: true,
+            }}
           />
         )
       ) : (
