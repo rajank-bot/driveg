@@ -10,6 +10,7 @@ import {
   FolderIcon,
 } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
+import Image from "next/image";
 
 // Sample data for testing
 const sampleFiles: FileItem[] = [
@@ -186,22 +187,46 @@ export default function HomePage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-900">Suggested files</h1>
-        <FileViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-      </div>
-
+    <>
       {sampleFiles.length > 0 ? (
-        viewMode === 'grid' ? (
-          <FileGrid files={sampleFiles} onFileClick={handleFileClick} onFileAction={handleFileAction} />
-        ) : (
-          <FileList files={sampleFiles} onFileClick={handleFileClick} onFileAction={handleFileAction} />
-        )
+        <div className="p-8">
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-2xl font-semibold text-gray-900">Suggested files</h1>
+            <FileViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+          </div>
+          {viewMode === 'grid' ? (
+            <FileGrid
+              files={sampleFiles}
+              onFileClick={handleFileClick}
+              onFileAction={handleFileAction}
+            />
+          ) : (
+            <FileList
+              files={sampleFiles}
+              onFileClick={handleFileClick}
+              onFileAction={handleFileAction}
+            />
+          )}
+        </div>
       ) : (
-        <p className="text-gray-600">No files to display</p>
+        <div className="min-h-full p-6 flex flex-col">
+          <h1 className="text-2xl font-normal text-gray-900 mb-6">Welcome to DriveG</h1>
+
+          <div className="flex-1 flex flex-col items-center mt-20 text-center gap-3">
+            <Image
+              src="/upload-file/upload-image-2.svg"
+              alt="Upload File"
+              width={100}
+              height={100}
+              className="w-48 h-48 object-contain"
+            />
+            <p className="text-gray-600 text-base font-normal">
+              Drag your files and folders here or use the 'New' button to upload files
+            </p>
+          </div>
+        </div>
       )}
-    </div>
+    </>
   )
 }
 
