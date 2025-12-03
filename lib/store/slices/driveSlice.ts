@@ -66,7 +66,7 @@ export const driveSlice = createSlice({
         state.files[index] = { ...state.files[index], ...action.payload };
       }
     },
-    deleteFile: (state, action: PayloadAction<string>) => {
+    deleteDriveFile: (state, action: PayloadAction<string>) => {
       state.files = state.files.filter((f) => f.id !== action.payload);
       state.selectedItems = state.selectedItems.filter((id) => id !== action.payload);
     },
@@ -138,7 +138,7 @@ export const {
   setFiles,
   addFile,
   updateFile,
-  deleteFile,
+  deleteDriveFile,
   moveToTrash,
   restoreFromTrash,
   setCurrentFolder,
