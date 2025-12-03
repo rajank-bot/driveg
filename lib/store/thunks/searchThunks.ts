@@ -25,11 +25,11 @@ export const searchFiles = createAsyncThunk<
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    const state = getState();
-    const allFiles = state.drive.files;
+    const state = getState() as RootState;
+    const allFiles = (state as any).drive.files as FileItem[];
 
     // Simple client-side search - replace with API call in production
-    let results = allFiles.filter((file) => {
+    let results = allFiles.filter((file: FileItem) => {
       if (file.trashed && !filters.trashed) return false;
 
       // Text search
@@ -93,23 +93,23 @@ export const getSearchSuggestions = createAsyncThunk<
       return [];
     }
 
-    const state = getState();
-    const allFiles = state.drive.files;
-    const recentSearches = state.search.recentSearches;
+    const state = getState() as RootState;
+    const allFiles = (state as any).drive.files as FileItem[];
+    const recentSearches = (state as any).search.recentSearches as string[];
 
     // Get suggestions from file names and recent searches
     const suggestions: string[] = [];
 
     // Add matching recent searches
     recentSearches
-      .filter((search) => search.toLowerCase().includes(query.toLowerCase()))
+      .filter((search: string) => search.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 3)
-      .forEach((search) => suggestions.push(search));
+      .forEach((search: string) => suggestions.push(search));
 
     // Add matching file names
     const fileNames = allFiles
-      .map((f) => f.name)
-      .filter((name) => name.toLowerCase().includes(query.toLowerCase()))
+      .map((f: FileItem) => f.name)
+      .filter((name: string) => name.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 5);
 
     fileNames.forEach((name) => {
