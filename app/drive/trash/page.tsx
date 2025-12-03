@@ -45,6 +45,13 @@ export default function TrashPage() {
             files={files}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            showColumns={{
+              name: true,
+              owner: true,
+              dateTrashed: true,
+              size: true,
+              originalLocation: true,
+            }}
           />
         )
       ) : (

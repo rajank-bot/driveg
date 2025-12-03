@@ -205,6 +205,14 @@ export default function HomePage() {
               files={sampleFiles}
               onFileClick={handleFileClick}
               onFileAction={handleFileAction}
+              showColumns={{
+                name: true,
+                reason: true,
+                owner: true,
+                location: true,
+                modified: true,
+                size: true,
+              }}
             />
           )}
         </div>
