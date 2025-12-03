@@ -15,6 +15,7 @@ export * from "./types";
 export { preloadState } from "./preloadState";
 export { initLanguage, setLanguage, DEFAULT_LANGUAGE } from "./initLanguage";
 export type { SupportedLanguage } from "./initLanguage";
+export { loadPersistedState } from "./store/middleware/persistenceMiddleware";
 
 // File Storage Utilities
 export {
@@ -28,8 +29,18 @@ export {
   clearAllFiles,
 } from "./utils/fileStorage";
 
+// Date Utilities
+export {
+  isValidDate,
+  formatDateForStorage,
+  parseDateFromStorage,
+} from "./utils/dateUtils";
+
 // Store Provider
 export { default as StoreProvider } from "./StoreProvider";
+
+// Window Sync
+export { initializeWindowSync } from "./store/middleware/windowSyncMiddleware";
 
 // Thunks (async actions)
 export * from "./store/thunks";
@@ -41,7 +52,7 @@ export {
   setFiles, 
   addFile, 
   updateFile, 
-  deleteFile, 
+  deleteDriveFile, 
   moveToTrash, 
   restoreFromTrash,
   setCurrentFolder,

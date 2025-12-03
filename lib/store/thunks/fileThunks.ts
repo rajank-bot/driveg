@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "../index";
-import { deleteFile as deleteFileAction } from "../slices/driveSlice";
+import { deleteDriveFile } from "../slices/driveSlice";
 import { deleteFile as deleteStoredFile, getFile, getFileUrl } from "../../utils/fileStorage";
 
 /**
@@ -54,7 +54,7 @@ export const deleteFileWithStorage = createAsyncThunk<
     await deleteStoredFile(fileId);
     
     // Delete from Redux state
-    dispatch(deleteFileAction(fileId));
+    dispatch(deleteDriveFile(fileId));
     
     return fileId;
   } catch (error: any) {
@@ -77,7 +77,7 @@ export const deleteFilesWithStorage = createAsyncThunk<
     
     // Delete from Redux state
     fileIds.forEach((fileId) => {
-      dispatch(deleteFileAction(fileId));
+      dispatch(deleteDriveFile(fileId));
     });
     
     return fileIds;

@@ -5,7 +5,7 @@ import {
   setFiles,
   addFile,
   updateFile,
-  deleteFile,
+  deleteDriveFile,
   setLoading,
   setError,
   moveToTrash,
@@ -126,7 +126,7 @@ export const deleteFileThunk = createAsyncThunk<
     }
 
     // Delete from Redux state
-    dispatch(deleteFile(fileId));
+    dispatch(deleteDriveFile(fileId));
     dispatch(setLoading(false));
     return fileId;
   } catch (error: any) {
@@ -221,12 +221,12 @@ export const copyFiles = createAsyncThunk<
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const state = getState();
-    const files = state.drive.files;
+    const state = getState() as RootState;
+    const files = (state as any).drive.files;
     const copiedFiles: FileItem[] = [];
 
     fileIds.forEach((fileId) => {
-      const originalFile = files.find((f) => f.id === fileId);
+      const originalFile = files.find((f: FileItem) => f.id === fileId);
       if (originalFile) {
         const copiedFile: FileItem = {
           ...originalFile,
