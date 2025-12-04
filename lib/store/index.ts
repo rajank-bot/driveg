@@ -10,9 +10,9 @@ import sharedDriveReducer from "./slices/sharedDriveSlice";
 import searchReducer from "./slices/searchSlice";
 import suggestionsReducer from "./slices/suggestionsSlice";
 import sortReducer from "./slices/sortSlice";
-import { persistenceMiddleware } from "./middleware/persistenceMiddleware";
 import { localStorageSync } from "./middleware/localStorageSync";
 import { windowSyncMiddleware } from "./middleware/windowSyncMiddleware";
+import { preloadState } from "../preloadState";
 
 const rootReducer = {
   drive: driveReducer,
@@ -29,14 +29,18 @@ const rootReducer = {
 };
 
 export const makeStore = (): ReturnType<typeof configureStore> => {
+  // Load persisted state from localStorage
+  const preloadedState = preloadState();
+
   return configureStore({
     reducer: rootReducer,
+    preloadedState,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({
         serializableCheck: {
           ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
         },
-      }).concat(persistenceMiddleware, localStorageSync, windowSyncMiddleware),
+      }).concat(localStorageSync, windowSyncMiddleware),
   });
 };
 

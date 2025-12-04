@@ -10,6 +10,7 @@ export interface FileItem {
   owner?: {
     name: string
     avatar?: string
+    initial?: string // Custom initial for display (e.g., "S" for "me")
   }
   modifiedTime?: string
   createdTime?: string

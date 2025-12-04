@@ -53,8 +53,9 @@ export const createFile = createAsyncThunk<
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 300));
 
+    const isFolder = fileData.type === "folder";
     const newFile: FileItem = {
-      id: `file-${Date.now()}`,
+      id: isFolder ? `folder-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` : `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: fileData.name || "Untitled",
       type: fileData.type || "file",
       parentId: fileData.parentId || null,
