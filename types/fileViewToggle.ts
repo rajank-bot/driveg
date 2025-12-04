@@ -48,6 +48,8 @@ export interface FileListProps {
   files: FileItem[]
   onFileClick?: (file: FileItem) => void
   onFileAction?: (file: FileItem, action: string) => void
+  selectedItems?: string[]
+  onSelectionChange?: (fileId: string, isSelected: boolean) => void
   className?: string
   showColumns?: {
     name?: boolean
