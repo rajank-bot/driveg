@@ -15,7 +15,7 @@ export * from "./types";
 export { preloadState } from "./preloadState";
 export { initLanguage, setLanguage, DEFAULT_LANGUAGE } from "./initLanguage";
 export type { SupportedLanguage } from "./initLanguage";
-export { loadPersistedState } from "./store/middleware/persistenceMiddleware";
+export { loadPersistedState } from "./store/middleware/localStorageSync";
 
 // File Storage Utilities
 export {
