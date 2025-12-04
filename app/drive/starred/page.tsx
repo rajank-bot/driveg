@@ -2,13 +2,17 @@
 
 import { FileViewToggle, FileGrid, FileList, useViewMode } from '@/components/FileViewToggle'
 import type { FileItem } from '@/components/FileViewToggle'
+import { useSortSettings } from '@/lib/hooks/useSortSettings'
+import { sortFiles } from '@/lib/utils/sortFiles'
+import { FolderIcon } from '@heroicons/react/24/outline'
 import { DocumentIcon } from '@heroicons/react/24/outline'
 import { ImageIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 export default function StarredPage() {
   const [viewMode, setViewMode] = useViewMode('list')
   const [isHydrated, setIsHydrated] = useState(false)
+  const [sortPanelOpen, setSortPanelOpen] = useState(false)
   const files: FileItem[] = [
     {
       id: '1',
@@ -19,7 +23,10 @@ export default function StarredPage() {
       owner: {
         name: 'John Doe',
       },
-      modifiedTime: new Date().toISOString(),
+      modifiedTime: '2024-12-01T10:00:00Z', // Dec 1, 10:00 AM
+      createdTime: '2024-11-25T09:00:00Z',
+      dateModifiedByMe: '2024-11-30T14:30:00Z', // Nov 30, 2:30 PM
+      dateOpenedByMe: '2024-12-03T09:15:00Z', // Dec 3, 9:15 AM (newest)
       size: '100 KB',
       location: 'Drive G',
       reasonSuggested: 'You opened • 10:00 AM',
@@ -34,7 +41,10 @@ export default function StarredPage() {
       owner: {
         name: 'Jane Doe',
       },
-      modifiedTime: new Date().toISOString(),
+      modifiedTime: '2024-11-28T15:45:00Z', // Nov 28, 3:45 PM
+      createdTime: '2024-11-20T10:00:00Z',
+      dateModifiedByMe: '2024-11-29T11:20:00Z', // Nov 29, 11:20 AM
+      dateOpenedByMe: '2024-12-02T08:30:00Z', // Dec 2, 8:30 AM
       size: '100 KB',
       location: 'Drive G',
       reasonSuggested: 'You opened • 10:00 AM',
@@ -49,13 +59,86 @@ export default function StarredPage() {
       owner: {
         name: 'John Doe',
       },
-      modifiedTime: new Date().toISOString(),
+      modifiedTime: '2024-11-30T08:20:00Z', // Nov 30, 8:20 AM
+      createdTime: '2024-11-15T12:00:00Z',
+      dateModifiedByMe: '2024-12-01T16:00:00Z', // Dec 1, 4:00 PM (newest)
+      dateOpenedByMe: '2024-12-01T10:45:00Z', // Dec 1, 10:45 AM
+      size: '100 KB',
+      location: 'Drive G',
+      reasonSuggested: 'You opened • 10:00 AM',
+      fileSensitivity: 'Standard',
+    },
+    {
+      id: '4',
+      name: 'Folder',
+      type: 'folder',
+      mimeType: 'folder',
+      icon: FolderIcon,
+      owner: {
+        name: 'John Doe',
+      },
+      modifiedTime: '2024-11-29T12:00:00Z', // Nov 29, 12:00 PM
+      createdTime: '2024-11-10T08:00:00Z',
+      dateModifiedByMe: '2024-11-28T09:15:00Z', // Nov 28, 9:15 AM (oldest)
+      dateOpenedByMe: '2024-11-30T14:20:00Z', // Nov 30, 2:20 PM (oldest)
       size: '100 KB',
       location: 'Drive G',
       reasonSuggested: 'You opened • 10:00 AM',
       fileSensitivity: 'Standard',
     }
   ]
+  // Get sort settings for "starred" view (INDEPENDENT from other views!)
+  const {
+    sortBy,
+    sortDirection,
+    foldersPosition,
+    setSortBy,
+    setSortDirection,
+    setFoldersPosition,
+  } = useSortSettings('starred')
+
+  // Available sort options for Starred
+  const sortByOptions = [
+    { value: 'name' as const, label: 'Name' },
+    { value: 'dateModified' as const, label: 'Date modified' },
+    { value: 'dateModifiedByMe' as const, label: 'Date modified by me' },
+    { value: 'dateOpenedByMe' as const, label: 'Date opened by me' },
+  ]
+
+  // Sort files based on current sort settings
+  const sortedFiles = useMemo(() => {
+    if (files.length === 0) return files
+    return sortFiles(files, sortBy, sortDirection, foldersPosition)
+  }, [files, sortBy, sortDirection, foldersPosition])
+
+  // Determine which date column to show based on sortBy
+  const getDateColumnConfig = () => {
+    switch (sortBy) {
+      case 'dateModified':
+        return {
+          showColumns: { modified: true },
+          columnHeader: 'Date modified',
+        }
+      case 'dateModifiedByMe':
+        return {
+          showColumns: { dateModifiedByMe: true },
+          columnHeader: 'Date modified by me',
+        }
+      case 'dateOpenedByMe':
+        return {
+          showColumns: { dateOpenedByMe: true },
+          columnHeader: 'Date opened by me',
+        }
+      default:
+        // Default to Date modified when sorting by name
+        return {
+          showColumns: { modified: true },
+          columnHeader: 'Date modified',
+        }
+    }
+  }
+
+  const dateColumnConfig = getDateColumnConfig()
 
   useEffect(() => {
     setIsHydrated(true)
@@ -78,28 +161,53 @@ export default function StarredPage() {
     <div className="p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Starred</h1>
+        <div className="flex items-center gap-3">
         <FileViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+        </div>
       </div>
 
-      {files.length > 0 ? (
+      {sortedFiles.length > 0 ? (
         viewMode === 'grid' ? (
           <FileGrid
-            files={files}
+            files={sortedFiles}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            foldersPosition={foldersPosition}
+            sortByOptions={sortByOptions}
+            onSortByChange={setSortBy}
+            onSortDirectionChange={setSortDirection}
+            onFoldersPositionChange={setFoldersPosition}
+            showFoldersSection={true}
+            sortPanelOpen={sortPanelOpen}
+            onSortPanelOpenChange={setSortPanelOpen}
           />
         ) : (
           <FileList
-            files={files}
+            files={sortedFiles}
             onFileClick={handleFileClick}
             onFileAction={handleFileAction}
             showColumns={{
               name: true,
               owner: true,
-              modified: true,
+              ...dateColumnConfig.showColumns,
               size: true,
               location: true,
             }}
+            customColumnHeaders={{
+              dateColumn: dateColumnConfig.columnHeader,
+            }}
+            sortBy={sortBy}
+            sortDirection={sortDirection}
+            foldersPosition={foldersPosition}
+            sortByOptions={sortByOptions}
+            onSortByChange={setSortBy}
+            onSortDirectionChange={setSortDirection}
+            onFoldersPositionChange={setFoldersPosition}
+            showFoldersSection={true}
+            sortPanelOpen={sortPanelOpen}
+            onSortPanelOpenChange={setSortPanelOpen}
           />
         )
       ) : (

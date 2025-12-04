@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { DocumentIcon, FolderIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import { SortPanel } from '@/components/SortPanel'
 import type { FileGridProps, FileItem } from '@/types/fileViewToggle'
 
 export default function FileGrid({
@@ -10,6 +11,16 @@ export default function FileGrid({
   onFileAction,
   className = '',
   groupedFiles,
+  sortBy,
+  sortDirection,
+  foldersPosition,
+  sortByOptions,
+  onSortByChange,
+  onSortDirectionChange,
+  onFoldersPositionChange,
+  showFoldersSection = true,
+  sortPanelOpen,
+  onSortPanelOpenChange,
 }: FileGridProps) {
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
@@ -124,8 +135,65 @@ export default function FileGrid({
     </div>
   )
 
+  // Get sort label for the tab
+  const getSortLabel = () => {
+    if (!sortBy) return ''
+    
+    const sortByLabels: Record<string, string> = {
+      name: 'Name',
+      dateModified: 'Date modified',
+      dateModifiedByMe: 'Date modified by me',
+      dateOpenedByMe: 'Date opened by me',
+      dateShared: 'Date shared',
+      dateTrashed: 'Date trashed',
+    }
+    
+    const directionLabels: Record<string, string> = {
+      aToZ: 'A to Z',
+      zToA: 'Z to A',
+      newToOld: 'New to old',
+      oldToNew: 'Old to new',
+    }
+    
+    const sortByLabel = sortByLabels[sortBy] || sortBy
+    const directionLabel = sortDirection ? directionLabels[sortDirection] : ''
+    
+    return `${sortByLabel} • ${directionLabel}`
+  }
+
+  const sortTooltip = getSortLabel()
+
   return (
     <div className={className}>
+      {/* Sort indicator tab with dropdown */}
+      {sortBy && sortByOptions && onSortByChange && onSortDirectionChange && (
+        <div className="mb-4">
+          <SortPanel
+            sortBy={sortBy}
+            sortDirection={sortDirection || 'aToZ'}
+            foldersPosition={foldersPosition || 'onTop'}
+            sortByOptions={sortByOptions}
+            onSortByChange={onSortByChange}
+            onSortDirectionChange={onSortDirectionChange}
+            onFoldersPositionChange={onFoldersPositionChange || (() => {})}
+            showFoldersSection={showFoldersSection}
+            open={sortPanelOpen}
+            onOpenChange={onSortPanelOpenChange}
+            align="start"
+          >
+            <button
+              className="relative group/tab inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors focus:outline-none focus:ring-0"
+              aria-label={`Sort: ${sortTooltip}`}
+            >
+              <span>{sortTooltip}</span>
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/tab:opacity-100 z-50">
+                {sortTooltip}
+              </span>
+            </button>
+          </SortPanel>
+        </div>
+      )}
+      
       {groupedFiles ? (
         Object.entries(groupedFiles).map(([groupName, groupFiles]) => (
           <div key={groupName} className="mb-6">

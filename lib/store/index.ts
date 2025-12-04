@@ -9,6 +9,7 @@ import workspaceReducer from "./slices/workspaceSlice";
 import sharedDriveReducer from "./slices/sharedDriveSlice";
 import searchReducer from "./slices/searchSlice";
 import suggestionsReducer from "./slices/suggestionsSlice";
+import sortReducer from "./slices/sortSlice";
 import { persistenceMiddleware } from "./middleware/persistenceMiddleware";
 import { localStorageSync } from "./middleware/localStorageSync";
 import { windowSyncMiddleware } from "./middleware/windowSyncMiddleware";
@@ -24,6 +25,7 @@ const rootReducer = {
   sharedDrive: sharedDriveReducer,
   search: searchReducer,
   suggestions: suggestionsReducer,
+  sort: sortReducer,
 };
 
 export const makeStore = (): ReturnType<typeof configureStore> => {

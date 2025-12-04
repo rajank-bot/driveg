@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { 
   DocumentIcon, 
   FolderIcon, 
@@ -8,9 +8,13 @@ import {
   ShareIcon,
   ArrowDownTrayIcon,
   PencilIcon,
-  StarIcon
+  StarIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  Bars3Icon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
+import { SortPanel } from '@/components/SortPanel'
 import type { FileListProps, FileItem } from '@/types/fileViewToggle'
 
 export default function FileList({
@@ -28,6 +32,16 @@ export default function FileList({
   },
   groupedFiles,
   customColumnHeaders,
+  sortBy,
+  sortDirection,
+  foldersPosition,
+  sortByOptions,
+  onSortByChange,
+  onSortDirectionChange,
+  onFoldersPositionChange,
+  showFoldersSection = true,
+  sortPanelOpen,
+  onSortPanelOpenChange,
 }: FileListProps) {
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
@@ -193,6 +207,16 @@ export default function FileList({
             {formatDate(file.dateTrashed)}
           </td>
         )}
+        {showColumns.dateModifiedByMe && (
+          <td className="px-4 py-1 text-sm text-gray-600">
+            {formatDate(file.dateModifiedByMe)}
+          </td>
+        )}
+        {showColumns.dateOpenedByMe && (
+          <td className="px-4 py-1 text-sm text-gray-600">
+            {formatDate(file.dateOpenedByMe)}
+          </td>
+        )}
         {showColumns.size && (
           <td className="px-4 py-1 text-sm text-gray-600">{file.size || '-'}</td>
         )}
@@ -295,14 +319,129 @@ export default function FileList({
     )
   }
 
+  // Helper function to get sort indicator for a column
+  const getSortIndicator = (columnSortBy: typeof sortBy) => {
+    if (!sortBy || sortBy !== columnSortBy) return null
+    
+    const isAscending = 
+      (sortBy === 'name' && sortDirection === 'aToZ') ||
+      (sortBy !== 'name' && sortDirection === 'oldToNew')
+    
+    return isAscending ? (
+      <ChevronUpIcon className="h-5 w-5 text-blue-600" strokeWidth={2.5} />
+    ) : (
+      <ChevronDownIcon className="h-5 w-5 text-blue-600" strokeWidth={2.5} />
+    )
+  }
+
+  // Date labels map - memoized to avoid recreation
+  const dateLabels = useMemo(() => ({
+    dateModified: 'Date modified',
+    dateModifiedByMe: 'Date modified by me',
+    dateOpenedByMe: 'Date opened by me',
+    dateShared: 'Date shared',
+    dateTrashed: 'Date trashed',
+  } as const), [])
+
+  // Helper function to get tooltip text - memoized based on sortBy and sortDirection
+  const getSortTooltip = useMemo(() => {
+    return (columnSortBy: NonNullable<typeof sortBy>): string => {
+      const isActive = sortBy === columnSortBy
+      
+      if (isActive) {
+        // When column is currently sorted, show what it will convert to
+        if (columnSortBy === 'name') {
+          return sortDirection === 'aToZ' ? 'Sort to Z-A' : 'Sort to A-Z'
+        } else {
+          // For date columns
+          const dateLabel = dateLabels[columnSortBy as keyof typeof dateLabels] || 'Date'
+          return sortDirection === 'newToOld' 
+            ? `Sort to Old to new` 
+            : `Sort to New to old`
+        }
+      } else {
+        // When column is not sorted, show what clicking will do (default behavior)
+        if (columnSortBy === 'name') {
+          return 'Sort by Name (A to Z)'
+        } else {
+          // For date columns
+          const dateLabel = dateLabels[columnSortBy as keyof typeof dateLabels] || 'Date'
+          return `Sort by ${dateLabel} (New to old)`
+        }
+      }
+    }
+  }, [sortBy, sortDirection, dateLabels])
+
+  // Handle column header click
+  const handleColumnClick = (columnSortBy: typeof sortBy) => {
+    if (!onSortByChange || !onSortDirectionChange || !columnSortBy) return
+
+    if (sortBy === columnSortBy) {
+      // Toggle direction if same column
+      if (columnSortBy === 'name') {
+        onSortDirectionChange(sortDirection === 'aToZ' ? 'zToA' : 'aToZ')
+      } else {
+        onSortDirectionChange(sortDirection === 'newToOld' ? 'oldToNew' : 'newToOld')
+      }
+    } else {
+      // Set new column with default direction
+      onSortByChange(columnSortBy)
+      if (columnSortBy === 'name') {
+        onSortDirectionChange('aToZ')
+      } else {
+        onSortDirectionChange('newToOld')
+      }
+    }
+  }
+
+  // Render sortable header
+  const renderSortableHeader = (
+    label: string,
+    columnSortBy: typeof sortBy,
+    isClickable: boolean = true
+  ) => {
+    const isActive = sortBy === columnSortBy
+    const tooltip = columnSortBy ? getSortTooltip(columnSortBy) : ''
+    
+    if (!isClickable) {
+      return (
+        <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">
+          {label}
+        </th>
+      )
+    }
+
+    return (
+      <th 
+        className={`px-4 py-1.5 text-left text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors ${
+          isActive ? 'bg-gray-50' : ''
+        }`}
+        onClick={() => handleColumnClick(columnSortBy)}
+      >
+        <div className="flex items-center gap-1.5 group/header relative">
+          <span>{label}</span>
+          {isActive && (
+            <div className="relative">
+              {getSortIndicator(columnSortBy)}
+            </div>
+          )}
+          {/* Tooltip - shows on hover for both active and inactive headers */}
+          {tooltip && (
+            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/header:opacity-100 z-50">
+              {tooltip}
+            </span>
+          )}
+        </div>
+      </th>
+    )
+  }
+
   return (
     <div className={className}>
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b border-gray-300">
-            {showColumns.name && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Name</th>
-            )}
+            {showColumns.name && renderSortableHeader('Name', 'name')}
             {showColumns.reason && (
               <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">
                 {customColumnHeaders?.reason !== '' ? (customColumnHeaders?.reason || 'Reason suggested') : ''}
@@ -313,31 +452,55 @@ export default function FileList({
                 Activity
               </th>
             )}
-            {showColumns.owner && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Owner</th>
+            {showColumns.owner && renderSortableHeader('Owner', undefined, false)}
+            {showColumns.sharedBy && renderSortableHeader('Shared by', undefined, false)}
+            {showColumns.location && renderSortableHeader('Location', undefined, false)}
+            {showColumns.originalLocation && renderSortableHeader('Original location', undefined, false)}
+            {showColumns.modified && renderSortableHeader(
+              customColumnHeaders?.dateColumn || customColumnHeaders?.modified || 'Date modified',
+              'dateModified'
             )}
-            {showColumns.sharedBy && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Shared by</th>
+            {showColumns.dateShared && renderSortableHeader(
+              customColumnHeaders?.dateColumn || 'Date shared',
+              'dateShared'
             )}
-            {showColumns.location && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Location</th>
+            {showColumns.dateTrashed && renderSortableHeader(
+              customColumnHeaders?.dateColumn || 'Date trashed',
+              'dateTrashed'
             )}
-            {showColumns.originalLocation && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Original location</th>
+            {showColumns.dateModifiedByMe && renderSortableHeader(
+              customColumnHeaders?.dateColumn || 'Date modified by me',
+              'dateModifiedByMe'
             )}
-            {showColumns.modified && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Date modified</th>
+            {showColumns.dateOpenedByMe && renderSortableHeader(
+              customColumnHeaders?.dateColumn || 'Date opened by me',
+              'dateOpenedByMe'
             )}
-            {showColumns.dateShared && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Date shared</th>
-            )}
-            {showColumns.dateTrashed && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">Date trashed</th>
-            )}
-            {showColumns.size && (
-              <th className="px-4 py-1.5 text-left text-sm font-medium text-gray-700">File size</th>
-            )}
-            <th className="px-4 py-1.5 w-20"></th>
+            {showColumns.size && renderSortableHeader('File size', undefined, false)}
+            <th className="px-4 py-1.5 w-20">
+              {sortBy && sortByOptions && onSortByChange && onSortDirectionChange && (
+                <SortPanel
+                  sortBy={sortBy}
+                  sortDirection={sortDirection || 'aToZ'}
+                  foldersPosition={foldersPosition || 'onTop'}
+                  sortByOptions={sortByOptions}
+                  onSortByChange={onSortByChange}
+                  onSortDirectionChange={onSortDirectionChange}
+                  onFoldersPositionChange={onFoldersPositionChange || (() => {})}
+                  showFoldersSection={showFoldersSection}
+                  open={sortPanelOpen}
+                  onOpenChange={onSortPanelOpenChange}
+                >
+                  <button
+                    className="flex items-center gap-1.5 px-2 py-1 text-sm text-gray-700 hover:bg-gray-50 transition-colors rounded border-0 focus:outline-none focus:ring-0"
+                    aria-label="Sort"
+                  >
+                    <Bars3Icon className="h-4 w-4" />
+                    <span>Sort</span>
+                  </button>
+                </SortPanel>
+              )}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -360,6 +523,8 @@ export default function FileList({
                             (showColumns.modified ? 1 : 0) +
                             (showColumns.dateShared ? 1 : 0) +
                             (showColumns.dateTrashed ? 1 : 0) +
+                            (showColumns.dateModifiedByMe ? 1 : 0) +
+                            (showColumns.dateOpenedByMe ? 1 : 0) +
                             (showColumns.size ? 1 : 0) +
                             1 // Actions column
                           } 
