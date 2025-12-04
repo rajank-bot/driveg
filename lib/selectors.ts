@@ -21,7 +21,8 @@ export const selectCurrentFolder = (state: State): string | null =>
   (state as any).drive.currentFolderId;
 export const selectFilesInCurrentFolder = (state: State): FileItem[] => {
   const currentFolderId = (state as any).drive.currentFolderId;
-  return (state as any).drive.files.filter(
+  const files = (state as any).drive.files || [];
+  return files.filter(
     (file: FileItem) => file.parentId === currentFolderId && !file.trashed
   );
 };
