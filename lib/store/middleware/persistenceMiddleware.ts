@@ -14,6 +14,7 @@ interface PersistedState {
     sortOrder: "asc" | "desc";
     searchQuery: string;
     breadcrumbs: Array<{ id: string; name: string }>;
+    files?: any[]; // Files are saved by localStorageSync, but we preserve them here
   };
   user: {
     isAuthenticated: boolean;
@@ -110,6 +111,23 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
       // @ts-expect-error - RootState type inference issue
       const searchState = store.getState().search;
 
+      // CRITICAL: ALWAYS preserve files from localStorage when Redux state is empty
+      // This prevents overwriting files during initial load or when state is reset
+      const currentFiles = (driveState as any).files || [];
+      const existingData = loadPersistedState();
+      const existingFiles = existingData?.drive?.files || [];
+      
+      // Only use Redux files if they exist AND are not empty
+      // Otherwise, ALWAYS preserve files from localStorage to prevent data loss
+      // This is critical because persistenceMiddleware runs on setCurrentFolder which
+      // happens before files are loaded from localStorage
+      const filesToSave = (currentFiles.length > 0) ? currentFiles : existingFiles;
+      
+      // Debug logging
+      if (action.type.includes("setCurrentFolder") && currentFiles.length === 0 && existingFiles.length > 0) {
+        console.log(`[PersistenceMiddleware] Preserving ${existingFiles.length} files from localStorage (Redux state is empty)`);
+      }
+
       const toPersist: PersistedState = {
         drive: {
           currentFolderId: driveState.currentFolderId,
@@ -119,6 +137,8 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
           sortOrder: driveState.sortOrder,
           searchQuery: driveState.searchQuery,
           breadcrumbs: driveState.breadcrumbs,
+          // Use files from Redux state if available, otherwise preserve from localStorage
+          files: filesToSave,
         },
         user: {
           isAuthenticated: userState.isAuthenticated,
@@ -178,6 +198,10 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
 
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(toPersist));
+        // Debug: Log when files are preserved
+        if (filesToSave.length > 0 && currentFiles.length === 0) {
+          console.log(`[PersistenceMiddleware] ✅ Preserved ${filesToSave.length} files from localStorage (action: ${action.type})`);
+        }
       } catch (error) {
         console.error("Failed to persist state:", error);
       }
@@ -188,10 +212,21 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
       try {
         // Only clear user-related data on logout, keep other preferences
         if (action.type.includes("user/logout")) {
+          // @ts-expect-error - RootState type inference issue
+          const driveState = store.getState().drive;
           const currentData = loadPersistedState();
           if (currentData && currentData.drive && currentData.navigation && currentData.search) {
+            const currentFiles = (driveState as any).files || [];
+            const existingFiles = currentData.drive?.files || [];
+            // Preserve files from localStorage if Redux state is empty
+            const filesToSave = (currentFiles.length > 0) ? currentFiles : existingFiles;
+            
             const clearedData: PersistedState = {
-              drive: currentData.drive,
+              drive: {
+                ...currentData.drive,
+                // Preserve files - use Redux if available, otherwise keep from localStorage
+                files: filesToSave,
+              },
               navigation: currentData.navigation,
               search: currentData.search,
               user: {
@@ -205,17 +240,27 @@ export const persistenceMiddleware: Middleware<{}, RootState> =
           }
         } else {
           // For other clear actions, just update the specific part
+          // @ts-expect-error - RootState type inference issue
+          const driveState = store.getState().drive;
           const currentData = loadPersistedState();
           if (currentData) {
             const updatedData: PersistedState = {
-              drive: currentData.drive || {
-                currentFolderId: null,
-                selectedItems: [],
-                viewMode: "grid",
-                sortBy: "modified",
-                sortOrder: "desc",
-                searchQuery: "",
-                breadcrumbs: [],
+              drive: {
+                ...(currentData.drive || {
+                  currentFolderId: null,
+                  selectedItems: [],
+                  viewMode: "grid",
+                  sortBy: "modified",
+                  sortOrder: "desc",
+                  searchQuery: "",
+                  breadcrumbs: [],
+                }),
+                // Preserve files - use Redux if available, otherwise keep from localStorage
+                files: (() => {
+                  const currentFiles = (driveState as any).files || [];
+                  const existingFiles = currentData.drive?.files || [];
+                  return (currentFiles.length > 0) ? currentFiles : existingFiles;
+                })(),
               },
               navigation: currentData.navigation || {
                 activeItem: "home",

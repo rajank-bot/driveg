@@ -4,6 +4,8 @@ import type { FileItem } from "../slices/driveSlice";
 import type { UploadItem } from "../slices/uploadSlice";
 import { formatDateForStorage, isValidDate } from "../../utils/dateUtils";
 
+const STORAGE_KEY = "drivegData";
+
 let isClientSide = false;
 let isHydrated = false;
 
@@ -22,6 +24,10 @@ if (typeof window !== "undefined") {
   }
 }
 
+/**
+ * localStorage sync middleware that saves entire relevant state after every action
+ * Only runs on client side and after page hydration
+ */
 export const localStorageSync: Middleware<{}, RootState> =
   (store) => (next) => (action: any) => {
     const result = next(action);
@@ -31,10 +37,11 @@ export const localStorageSync: Middleware<{}, RootState> =
       try {
         const state = store.getState() as RootState;
 
+        // Save entire relevant state to localStorage
         const drivegData = {
           drive: {
             // @ts-expect-error - RootState type inference issue
-            files: state.drive.files.map((file: FileItem) => ({
+            files: ((state.drive as any).files || []).map((file: FileItem) => ({
               ...file,
               // Format dates properly to avoid timezone issues
               createdAt: file.createdAt
@@ -83,25 +90,6 @@ export const localStorageSync: Middleware<{}, RootState> =
               ? {
                   // @ts-expect-error - RootState type inference issue
                   ...state.user.currentUser,
-                  // Format dates if they exist
-                  // @ts-expect-error - RootState type inference issue
-                  createdAt: (state.user.currentUser as any).createdAt
-                    ? (() => {
-                        try {
-                          const date = new Date(
-                            // @ts-expect-error - RootState type inference issue
-                            (state.user.currentUser as any).createdAt
-                          );
-                          return isValidDate(date)
-                            ? formatDateForStorage(date)
-                            : // @ts-expect-error - RootState type inference issue
-                              (state.user.currentUser as any).createdAt;
-                        } catch {
-                          // @ts-expect-error - RootState type inference issue
-                          return (state.user.currentUser as any).createdAt;
-                        }
-                      })()
-                    : undefined,
                 }
               : null,
             // @ts-expect-error - RootState type inference issue
@@ -122,8 +110,39 @@ export const localStorageSync: Middleware<{}, RootState> =
           search: {
             // @ts-expect-error - RootState type inference issue
             query: state.search.query,
-            // @ts-expect-error - RootState type inference issue
-            filters: state.search.filters,
+            filters: {
+              // @ts-expect-error - RootState type inference issue
+              ...state.search.filters,
+              // Format dates properly
+              // @ts-expect-error - RootState type inference issue
+              modifiedAfter: state.search.filters.modifiedAfter
+                ? (() => {
+                    try {
+                      // @ts-expect-error - RootState type inference issue
+                      const date = new Date(state.search.filters.modifiedAfter);
+                      return isValidDate(date)
+                        ? formatDateForStorage(date)
+                        : undefined;
+                    } catch {
+                      return undefined;
+                    }
+                  })()
+                : undefined,
+              // @ts-expect-error - RootState type inference issue
+              modifiedBefore: state.search.filters.modifiedBefore
+                ? (() => {
+                    try {
+                      // @ts-expect-error - RootState type inference issue
+                      const date = new Date(state.search.filters.modifiedBefore);
+                      return isValidDate(date)
+                        ? formatDateForStorage(date)
+                        : undefined;
+                    } catch {
+                      return undefined;
+                    }
+                  })()
+                : undefined,
+            },
             // @ts-expect-error - RootState type inference issue
             recentSearches: state.search.recentSearches,
             // @ts-expect-error - RootState type inference issue
@@ -132,7 +151,7 @@ export const localStorageSync: Middleware<{}, RootState> =
           upload: {
             // Only sync upload metadata, not File objects
             // @ts-expect-error - RootState type inference issue
-            uploads: state.upload.uploads.map((upload: UploadItem) => ({
+            uploads: ((state.upload as any).uploads || []).map((upload: UploadItem) => ({
               id: upload.id,
               name: upload.name,
               size: upload.size,
@@ -149,7 +168,7 @@ export const localStorageSync: Middleware<{}, RootState> =
           },
         };
 
-        localStorage.setItem("drivegData", JSON.stringify(drivegData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(drivegData));
       } catch (error) {
         console.warn(
           "[LocalStorageSync] Failed to save to localStorage:",
@@ -160,3 +179,29 @@ export const localStorageSync: Middleware<{}, RootState> =
 
     return result;
   };
+
+/**
+ * Load persisted state from localStorage
+ * Only runs on client side
+ */
+export const loadPersistedState = (): any => {
+  if (typeof window === "undefined") {
+    return undefined;
+  }
+
+  try {
+    const serialized = localStorage.getItem(STORAGE_KEY);
+    if (serialized === null) return undefined;
+
+    return JSON.parse(serialized);
+  } catch (error) {
+    console.error("Failed to load persisted state:", error);
+    // Clear corrupted data
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore errors when clearing
+    }
+    return undefined;
+  }
+};

@@ -1,20 +1,25 @@
 'use client'
 
 import { FileViewToggle, FileGrid, FileList, useViewMode } from '@/components/FileViewToggle'
-import type { FileItem } from '@/components/FileViewToggle'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { ChevronDownIcon } from "@heroicons/react/24/outline"
 import Image from "next/image"
 import NewMenu from '@/components/NewMenu/NewMenu'
 
 const filters = ["Type", "People", "Modified", "Source"]
+import type { FileItem as UIFileItem } from '@/components/FileViewToggle'
+import { useAppSelector } from '@/lib/hooks'
+import { selectFilesInCurrentFolder, selectCurrentUser } from '@/lib/selectors'
+import type { FileItem as ReduxFileItem } from '@/lib/store/slices/driveSlice'
+import { FolderIcon } from '@heroicons/react/24/outline'
 
 export default function MyDrivePage() {
   const [viewMode, setViewMode] = useViewMode('list')
   const [isHydrated, setIsHydrated] = useState(false)
   const [contextMenuOpen, setContextMenuOpen] = useState(false)
   const [contextPosition, setContextPosition] = useState<{ x: number; y: number } | null>(null)
-  const files: FileItem[] = []
+  const reduxFiles = useAppSelector(selectFilesInCurrentFolder)
+  const currentUser = useAppSelector(selectCurrentUser)
 
   useEffect(() => {
     setIsHydrated(true)
@@ -32,17 +37,41 @@ export default function MyDrivePage() {
       setContextPosition(null)
     }
   }, [])
+  
+  // Transform Redux FileItem to UI FileItem format
+  const files: UIFileItem[] = useMemo(() => {
+    return reduxFiles.map((file: ReduxFileItem): UIFileItem => {
+      return {
+        id: file.id,
+        name: file.name,
+        type: file.type === 'folder' ? 'folder' : 'file',
+        mimeType: file.mimeType,
+        icon: file.type === 'folder' ? FolderIcon : undefined,
+        owner: {
+          name: 'me', // Display name is always "me" for own files
+          avatar: currentUser?.avatar,
+          initial: currentUser?.name?.charAt(0).toUpperCase() || 'M', // Use logged-in user's initial
+        },
+        modifiedTime: file.modifiedAt,
+        createdTime: file.createdAt,
+        size: file.size ? `${(file.size / 1024).toFixed(1)} KB` : file.type === 'folder' ? '-' : undefined,
+        location: 'My Drive',
+        starred: file.starred,
+        shared: file.shared,
+      }
+    })
+  }, [reduxFiles, currentUser])
 
   // Show nothing during hydration to prevent mismatch
   if (!isHydrated) {
     return null
   }
 
-  const handleFileClick = (file: FileItem) => {
+  const handleFileClick = (file: UIFileItem) => {
     console.log('File clicked:', file.name)
   }
 
-  const handleFileAction = (file: FileItem, action: string) => {
+  const handleFileAction = (file: UIFileItem, action: string) => {
     console.log('File action:', action, file.name)
   }
 

@@ -82,10 +82,23 @@ export default function FileList({
     if (!dateString) return ''
     try {
       const date = new Date(dateString)
+      const now = new Date()
+      const isToday = date.toDateString() === now.toDateString()
+      
+      if (isToday) {
+        // Show time for today's files (e.g., "6:59 PM")
+        return date.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        })
+      }
+      
+      // Show date for older files
       return date.toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
       })
     } catch {
       return dateString
@@ -136,7 +149,7 @@ export default function FileList({
                   />
                 ) : (
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs text-gray-600">
-                    {file.owner.name.charAt(0).toUpperCase()}
+                    {file.owner.initial || file.owner.name.charAt(0).toUpperCase()}
                   </div>
                 )}
                 <span className="text-sm text-gray-600">{file.owner.name}</span>
