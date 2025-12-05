@@ -10,10 +10,6 @@ import {
 import { addFile } from "../slices/driveSlice";
 import type { FileItem } from "../slices/driveSlice";
 import type { UploadItem } from "../slices/uploadSlice";
-import {
-  storeFile,
-  deleteFile as deleteStoredFile,
-} from "../../utils/fileStorage";
 
 // Upload file
 export const uploadFile = createAsyncThunk<
@@ -23,10 +19,9 @@ export const uploadFile = createAsyncThunk<
 >(
   "upload/uploadFile",
   async ({ file, parentId = null }, { dispatch, rejectWithValue }) => {
-    const uploadId = `upload-${Date.now()}-${Math.random()}`;
-    const fileId = `file-${Date.now()}-${Math.random()}`;
-
+    let uploadId = "";
     try {
+      uploadId = `upload-${Date.now()}-${Math.random()}`;
       const uploadItem: UploadItem = {
         id: uploadId,
         file,
@@ -35,67 +30,55 @@ export const uploadFile = createAsyncThunk<
         progress: 0,
         status: "pending",
         parentId,
-        mimeType: file.type,
       };
 
       dispatch(addUpload(uploadItem));
-      dispatch(updateUploadProgress({ id: uploadId, progress: 10 }));
 
-      // Store file to IndexedDB
-      try {
-        await storeFile(fileId, file, file.type);
-        dispatch(updateUploadProgress({ id: uploadId, progress: 50 }));
-      } catch (storageError: any) {
-        dispatch(
-          failUpload({
-            id: uploadId,
-            error: `Storage failed: ${storageError.message}`,
-          })
-        );
-        return rejectWithValue(
-          storageError.message || "Failed to store file"
-        );
-      }
+      const result = await new Promise<{ uploadId: string; fileId: string }>(
+        (resolve, reject) => {
+          if (Math.random() < 0.05) {
+            dispatch(failUpload({ id: uploadId, error: "Upload failed" }));
+            reject(new Error("Upload failed"));
+            return;
+          }
 
-      // Simulate remaining upload progress (metadata processing, etc.)
-      dispatch(updateUploadProgress({ id: uploadId, progress: 75 }));
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 10;
+            dispatch(updateUploadProgress({ id: uploadId, progress }));
 
-      // Create file item after upload completes
-      const fileItem: FileItem = {
-        id: fileId,
-        name: file.name,
-        type: "file",
-        mimeType: file.type,
-        size: file.size,
-        parentId,
-        createdAt: new Date().toISOString(),
-        modifiedAt: new Date().toISOString(),
-        createdBy: "current-user",
-        modifiedBy: "current-user",
-        starred: false,
-        trashed: false,
-        shared: false,
-      };
+            if (progress >= 100) {
+              clearInterval(interval);
 
-      dispatch(updateUploadProgress({ id: uploadId, progress: 100 }));
-      dispatch(addFile(fileItem));
-      dispatch(completeUpload({ id: uploadId, fileId: fileItem.id }));
+              const fileItem: FileItem = {
+                id: `file-${Date.now()}`,
+                name: file.name,
+                type: "file",
+                mimeType: file.type,
+                size: file.size,
+                parentId,
+                createdAt: new Date().toISOString(),
+                modifiedAt: new Date().toISOString(),
+                createdBy: "current-user",
+                modifiedBy: "current-user",
+                starred: false,
+                trashed: false,
+                shared: false,
+              };
 
-      return { uploadId, fileId: fileItem.id };
-    } catch (error: any) {
-      // Clean up stored file if upload fails
-      try {
-        await deleteStoredFile(fileId);
-      } catch (cleanupError) {
-        console.error("Failed to cleanup file:", cleanupError);
-      }
-
-      dispatch(
-        failUpload({
-          id: uploadId,
-          error: error.message || "Upload failed",
-        })
+              dispatch(addFile(fileItem));
+              dispatch(completeUpload({ id: uploadId, fileId: fileItem.id }));
+              resolve({ uploadId, fileId: fileItem.id });
+            }
+          }, 200);
+        }
       );
+
+      return result;
+    } catch (error: any) {
+      if (uploadId) {
+        dispatch(removeUpload(uploadId));
+      }
       return rejectWithValue(error.message || "Upload failed");
     }
   }
