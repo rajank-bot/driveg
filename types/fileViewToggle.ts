@@ -28,6 +28,8 @@ export interface FileItem {
   dateShared?: string
   dateTrashed?: string
   originalLocation?: string
+  dateModifiedByMe?: string
+  dateOpenedByMe?: string
 }
 
 export interface FileViewToggleProps {
@@ -42,6 +44,17 @@ export interface FileGridProps {
   onFileAction?: (file: FileItem, action: string) => void
   className?: string
   groupedFiles?: { [key: string]: FileItem[] }
+  // Sort props for sort indicator tab with dropdown
+  sortBy?: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed'
+  sortDirection?: 'aToZ' | 'zToA' | 'newToOld' | 'oldToNew'
+  foldersPosition?: 'onTop' | 'mixedWithFiles'
+  sortByOptions?: Array<{ value: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed'; label: string }>
+  onSortByChange?: (sortBy: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed') => void
+  onSortDirectionChange?: (direction: 'aToZ' | 'zToA' | 'newToOld' | 'oldToNew') => void
+  onFoldersPositionChange?: (position: 'onTop' | 'mixedWithFiles') => void
+  showFoldersSection?: boolean
+  sortPanelOpen?: boolean
+  onSortPanelOpenChange?: (open: boolean) => void
 }
 
 export interface FileListProps {
@@ -61,13 +74,27 @@ export interface FileListProps {
     dateShared?: boolean
     dateTrashed?: boolean
     originalLocation?: boolean
+    dateModifiedByMe?: boolean
+    dateOpenedByMe?: boolean
   }
   groupedFiles?: { [key: string]: FileItem[] }
   customColumnHeaders?: {
     reason?: string
     activity?: string
     modified?: string
+    dateColumn?: string
     [key: string]: string | undefined
   }
+  // Sort props for interactive sorting
+  sortBy?: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed'
+  sortDirection?: 'aToZ' | 'zToA' | 'newToOld' | 'oldToNew'
+  foldersPosition?: 'onTop' | 'mixedWithFiles'
+  sortByOptions?: Array<{ value: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed'; label: string }>
+  onSortByChange?: (sortBy: 'name' | 'dateModified' | 'dateModifiedByMe' | 'dateOpenedByMe' | 'dateShared' | 'dateTrashed') => void
+  onSortDirectionChange?: (direction: 'aToZ' | 'zToA' | 'newToOld' | 'oldToNew') => void
+  onFoldersPositionChange?: (position: 'onTop' | 'mixedWithFiles') => void
+  showFoldersSection?: boolean
+  sortPanelOpen?: boolean
+  onSortPanelOpenChange?: (open: boolean) => void
 }
 

@@ -229,7 +229,7 @@ export default function HomePage() {
               className="w-48 h-48 object-contain"
             />
             <p className="text-gray-600 text-base font-normal">
-              Drag your files and folders here or use the 'New' button to upload files
+              Drag your files and folders here or use the &apos;New&apos; button to upload files
             </p>
           </div>
         </div>
