@@ -1,3 +1,4 @@
+import { sampleFiles } from "@/data/intialData";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface FileItem {
@@ -38,7 +39,7 @@ export interface DriveState {
 }
 
 const initialState: DriveState = {
-  files: [],
+  files: sampleFiles,
   currentFolderId: null,
   selectedItems: [],
   viewMode: "grid",
