@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { SortPanel } from '@/components/SortPanel'
 import type { FileGridProps, FileItem } from '@/types/fileViewToggle'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 export default function FileGrid({
   files,
@@ -40,6 +41,20 @@ export default function FileGrid({
     deleteForever: false,
     ...(actionConfig || {}),
   }), [actionConfig])
+
+  const menuItems = useMemo(() => {
+    const items: Array<{ label: string; action: string; icon: React.ComponentType<{ className?: string }>; tone?: 'danger' | 'default' }> = []
+    if (resolvedActions.remove) {
+      items.push({ label: 'Move to trash', action: 'remove', icon: TrashIcon })
+    }
+    if (resolvedActions.restore) {
+      items.push({ label: 'Restore', action: 'restore', icon: ArrowUturnLeftIcon })
+    }
+    if (resolvedActions.deleteForever) {
+      items.push({ label: 'Delete forever', action: 'deleteForever', icon: XMarkIcon, tone: 'danger' })
+    }
+    return items
+  }, [resolvedActions])
 
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
@@ -111,12 +126,12 @@ export default function FileGrid({
                 onFileAction?.(file, 'remove')
               }}
               className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-              aria-label="Remove"
+              aria-label="Move to trash"
             >
               <TrashIcon className="h-5 w-5 text-gray-700" />
             </button>
             <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
-              Remove
+              Move to trash
             </span>
           </div>
         )}
@@ -158,16 +173,47 @@ export default function FileGrid({
         )}
 
         <div className="relative group/icon">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onFileAction?.(file, 'more')
-            }}
-            className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-            aria-label="More options"
-          >
-            <EllipsisVerticalIcon className="h-5 w-5 text-gray-700" />
-          </button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                }}
+                className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                aria-label="More options"
+              >
+                <EllipsisVerticalIcon className="h-5 w-5 text-gray-700" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                className="z-50 min-w-[180px] rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none"
+                side="bottom"
+                align="end"
+                sideOffset={8}
+              >
+                {menuItems.length > 0 ? (
+                  menuItems.map((item) => (
+                    <DropdownMenu.Item
+                      key={item.action}
+                      className={`flex cursor-pointer items-center gap-3 rounded px-3 py-2 text-sm text-gray-700 outline-none data-[highlighted]:bg-gray-100 ${
+                        item.tone === 'danger' ? 'text-red-600 data-[highlighted]:bg-red-50' : ''
+                      }`}
+                      onSelect={(event) => {
+                        event.preventDefault()
+                        onFileAction?.(file, item.action)
+                      }}
+                    >
+                      <item.icon className={`h-4 w-4 ${item.tone === 'danger' ? 'text-red-600' : 'text-gray-600'}`} />
+                      <span>{item.label}</span>
+                    </DropdownMenu.Item>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-400">No actions available</div>
+                )}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
           <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
             More options
           </span>
