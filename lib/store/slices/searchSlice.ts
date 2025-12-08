@@ -10,7 +10,7 @@ export interface SearchFilter {
   sizeMax?: number;
   mimeType?: string;
   starred?: boolean;
-  trashed?: boolean;
+  isTrashed?: boolean;
   shared?: boolean;
 }
 

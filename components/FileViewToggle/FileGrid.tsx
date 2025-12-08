@@ -1,7 +1,14 @@
 'use client'
 
-import React from 'react'
-import { DocumentIcon, FolderIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import React, { useMemo } from 'react'
+import {
+  DocumentIcon,
+  FolderIcon,
+  EllipsisVerticalIcon,
+  TrashIcon,
+  ArrowUturnLeftIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { SortPanel } from '@/components/SortPanel'
 import type { FileGridProps, FileItem } from '@/types/fileViewToggle'
 
@@ -21,7 +28,19 @@ export default function FileGrid({
   showFoldersSection = true,
   sortPanelOpen,
   onSortPanelOpenChange,
+  actionConfig,
 }: FileGridProps) {
+  const resolvedActions = useMemo(() => ({
+    share: false,
+    download: false,
+    rename: false,
+    star: false,
+    remove: false,
+    restore: false,
+    deleteForever: false,
+    ...(actionConfig || {}),
+  }), [actionConfig])
+
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
       const Icon = file.icon
@@ -82,8 +101,62 @@ export default function FileGrid({
         <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
       </div>
 
-      {/* Three dots icon - always visible */}
-      <div className="absolute right-2 top-2 z-10">
+      {/* Quick actions - always accessible in grid */}
+      <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
+        {resolvedActions.remove && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'remove')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Remove"
+            >
+              <TrashIcon className="h-5 w-5 text-gray-700" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Remove
+            </span>
+          </div>
+        )}
+
+        {resolvedActions.restore && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'restore')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Restore"
+            >
+              <ArrowUturnLeftIcon className="h-5 w-5 text-gray-700" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Restore
+            </span>
+          </div>
+        )}
+
+        {resolvedActions.deleteForever && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'deleteForever')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Delete forever"
+            >
+              <XMarkIcon className="h-5 w-5 text-red-600" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Delete forever
+            </span>
+          </div>
+        )}
+
         <div className="relative group/icon">
           <button
             onClick={(e) => {
@@ -95,7 +168,7 @@ export default function FileGrid({
           >
             <EllipsisVerticalIcon className="h-5 w-5 text-gray-700" />
           </button>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+          <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
             More options
           </span>
         </div>

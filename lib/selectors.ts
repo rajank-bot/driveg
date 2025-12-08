@@ -23,7 +23,7 @@ export const selectFilesInCurrentFolder = (state: State): FileItem[] => {
   const currentFolderId = (state as any).drive.currentFolderId;
   const files = (state as any).drive.files || [];
   return files.filter(
-    (file: FileItem) => file.parentId === currentFolderId && !file.trashed
+    (file: FileItem) => file.parentId === currentFolderId && !file.isTrashed
   );
 };
 export const selectSelectedItems = (state: State): string[] =>
@@ -42,13 +42,13 @@ export const selectBreadcrumbs = (
 ): Array<{ id: string; name: string }> => (state as any).drive.breadcrumbs;
 export const selectStarredFiles = (state: State): FileItem[] =>
   (state as any).drive.files.filter(
-    (file: FileItem) => file.starred && !file.trashed
+    (file: FileItem) => file.starred && !file.isTrashed
   );
 export const selectTrashedFiles = (state: State): FileItem[] =>
-  (state as any).drive.files.filter((file: FileItem) => file.trashed);
+  (state as any).drive.files.filter((file: FileItem) => file.isTrashed);
 export const selectSharedFiles = (state: State): FileItem[] =>
   (state as any).drive.files.filter(
-    (file: FileItem) => file.shared && !file.trashed
+    (file: FileItem) => file.shared && !file.isTrashed
   );
 
 // User selectors

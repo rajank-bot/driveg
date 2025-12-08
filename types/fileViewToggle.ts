@@ -32,6 +32,16 @@ export interface FileItem {
   dateOpenedByMe?: string
 }
 
+export interface FileActionConfig {
+  share?: boolean
+  download?: boolean
+  rename?: boolean
+  star?: boolean
+  remove?: boolean
+  restore?: boolean
+  deleteForever?: boolean
+}
+
 export interface FileViewToggleProps {
   viewMode: ViewMode
   onViewModeChange: (mode: ViewMode) => void
@@ -55,6 +65,7 @@ export interface FileGridProps {
   showFoldersSection?: boolean
   sortPanelOpen?: boolean
   onSortPanelOpenChange?: (open: boolean) => void
+  actionConfig?: FileActionConfig
 }
 
 export interface FileListProps {
@@ -96,5 +107,6 @@ export interface FileListProps {
   showFoldersSection?: boolean
   sortPanelOpen?: boolean
   onSortPanelOpenChange?: (open: boolean) => void
+  actionConfig?: FileActionConfig
 }
 

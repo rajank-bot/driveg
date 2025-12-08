@@ -16,6 +16,7 @@ import {
 import { useAppSelector } from '@/lib/hooks'
 import { selectFilesInCurrentFolder, selectCurrentUser } from '@/lib/selectors'
 import type { FileItem as ReduxFileItem } from '@/lib/store/slices/driveSlice'
+import { useFileTrashActions } from '@/lib/hooks/useFileTrashActions'
 
 export default function MyDrivePage() {
   const [viewMode, setViewMode] = useViewMode('list')
@@ -25,6 +26,7 @@ export default function MyDrivePage() {
   const reduxFiles = useAppSelector(selectFilesInCurrentFolder)
   const currentUser = useAppSelector(selectCurrentUser)
   const [sortPanelOpen, setSortPanelOpen] = useState(false)
+  const { moveToTrash } = useFileTrashActions()
 
   useEffect(() => {
     setIsHydrated(true)
@@ -129,9 +131,13 @@ export default function MyDrivePage() {
     console.log('File clicked:', file.name)
   }
 
-  const handleFileAction = (file: UIFileItem, action: string) => {
+  const handleFileAction = useCallback((file: UIFileItem, action: string) => {
+    if (action === 'remove') {
+      void moveToTrash(file.id)
+      return
+    }
     console.log('File action:', action, file.name)
-  }
+  }, [moveToTrash])
 
   return (
     <div className="h-full" onContextMenu={handleContextMenu}>
@@ -149,6 +155,7 @@ export default function MyDrivePage() {
               files={sortedFiles}
               onFileClick={handleFileClick}
               onFileAction={handleFileAction}
+              actionConfig={{ remove: true }}
               sortBy={sortBy}
               sortDirection={sortDirection}
               foldersPosition={foldersPosition}
@@ -165,6 +172,7 @@ export default function MyDrivePage() {
               files={sortedFiles}
               onFileClick={handleFileClick}
               onFileAction={handleFileAction}
+              actionConfig={{ remove: true }}
               showColumns={{
                 name: true,
                 owner: true,

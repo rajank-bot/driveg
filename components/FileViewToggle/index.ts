@@ -8,5 +8,6 @@ export type {
   FileViewToggleProps,
   FileGridProps,
   FileListProps,
+  FileActionConfig,
 } from '@/types/fileViewToggle'
 

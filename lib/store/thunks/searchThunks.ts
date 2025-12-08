@@ -30,7 +30,7 @@ export const searchFiles = createAsyncThunk<
 
     // Simple client-side search - replace with API call in production
     let results = allFiles.filter((file: FileItem) => {
-      if (file.trashed && !filters.trashed) return false;
+      if (file.isTrashed && !filters.isTrashed) return false;
 
       // Text search
       if (query) {

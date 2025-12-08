@@ -12,6 +12,9 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   Bars3Icon,
+  TrashIcon,
+  ArrowUturnLeftIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { SortPanel } from '@/components/SortPanel'
@@ -42,7 +45,27 @@ export default function FileList({
   showFoldersSection = true,
   sortPanelOpen,
   onSortPanelOpenChange,
+  actionConfig,
 }: FileListProps) {
+  const resolvedActions = useMemo(() => ({
+    share: true,
+    download: true,
+    rename: true,
+    star: true,
+    remove: false,
+    restore: false,
+    deleteForever: false,
+    ...(actionConfig || {}),
+  }), [actionConfig])
+
+  const hasQuickActions =
+    resolvedActions.share ||
+    resolvedActions.download ||
+    resolvedActions.rename ||
+    resolvedActions.star ||
+    resolvedActions.remove ||
+    resolvedActions.restore ||
+    resolvedActions.deleteForever
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
       const Icon = file.icon
@@ -235,80 +258,140 @@ export default function FileList({
         )}
         <td className="px-4 py-1">
           <div className="flex items-center gap-1 justify-end">
-            {/* Share, Download, Rename, Starred icons - visible on hover */}
-            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-              {/* Share Icon */}
-              <div className="relative group/icon">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFileAction?.(file, 'share')
-                  }}
-                  className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-                  aria-label="Share"
-                >
-                  <ShareIcon className="h-5 w-5 text-gray-700" />
-                </button>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
-                  Share
-                </span>
-              </div>
+            {/* Quick action icons - visible on hover */}
+            {hasQuickActions && (
+              <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                {resolvedActions.share && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'share')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Share"
+                    >
+                      <ShareIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Share
+                    </span>
+                  </div>
+                )}
 
-              {/* Download Icon */}
-              <div className="relative group/icon">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFileAction?.(file, 'download')
-                  }}
-                  className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-                  aria-label="Download"
-                >
-                  <ArrowDownTrayIcon className="h-5 w-5 text-gray-700" />
-                </button>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
-                  Download
-                </span>
-              </div>
+                {resolvedActions.download && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'download')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Download"
+                    >
+                      <ArrowDownTrayIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Download
+                    </span>
+                  </div>
+                )}
 
-              {/* Rename Icon */}
-              <div className="relative group/icon">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFileAction?.(file, 'rename')
-                  }}
-                  className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-                  aria-label="Rename"
-                >
-                  <PencilIcon className="h-5 w-5 text-gray-700" />
-                </button>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
-                  Rename
-                </span>
-              </div>
+                {resolvedActions.rename && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'rename')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Rename"
+                    >
+                      <PencilIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Rename
+                    </span>
+                  </div>
+                )}
 
-              {/* Starred Icon */}
-              <div className="relative group/icon">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onFileAction?.(file, file.starred ? 'unstar' : 'star')
-                  }}
-                  className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-                  aria-label={file.starred ? 'Remove from starred' : 'Add to starred'}
-                >
-                  {file.starred ? (
-                    <StarIconSolid className="h-5 w-5 text-yellow-500" />
-                  ) : (
-                    <StarIcon className="h-5 w-5 text-gray-700" />
-                  )}
-                </button>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
-                  {file.starred ? 'Remove from starred' : 'Add to starred'}
-                </span>
+                {resolvedActions.star && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, file.starred ? 'unstar' : 'star')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label={file.starred ? 'Remove from starred' : 'Add to starred'}
+                    >
+                      {file.starred ? (
+                        <StarIconSolid className="h-5 w-5 text-yellow-500" />
+                      ) : (
+                        <StarIcon className="h-5 w-5 text-gray-700" />
+                      )}
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      {file.starred ? 'Remove from starred' : 'Add to starred'}
+                    </span>
+                  </div>
+                )}
+
+                {resolvedActions.remove && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'remove')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Remove"
+                    >
+                      <TrashIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Remove
+                    </span>
+                  </div>
+                )}
+
+                {resolvedActions.restore && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'restore')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Restore"
+                    >
+                      <ArrowUturnLeftIcon className="h-5 w-5 text-gray-700" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Restore
+                    </span>
+                  </div>
+                )}
+
+                {resolvedActions.deleteForever && (
+                  <div className="relative group/icon">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onFileAction?.(file, 'deleteForever')
+                      }}
+                      className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                      aria-label="Delete forever"
+                    >
+                      <XMarkIcon className="h-5 w-5 text-red-600" />
+                    </button>
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+                      Delete forever
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
             {/* Three dots icon - always visible */}
             <div className="relative group/icon">
