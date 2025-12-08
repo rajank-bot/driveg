@@ -104,7 +104,7 @@ export default function TrashPage() {
     console.log('File clicked:', file.name)
   }
 
-  const handleFileAction = useCallback((file: UIFileItem, action: string) => {
+  const handleFileAction = (file: UIFileItem, action: string) => {
     if (action === 'restore') {
       void restoreFromTrash(file.id)
       return
@@ -114,7 +114,7 @@ export default function TrashPage() {
       return
     }
     console.log('File action:', action, file.name)
-  }, [restoreFromTrash, deleteForever])
+  }
 
   const sortByOptions = [
     { value: 'name' as const, label: 'Name' },
