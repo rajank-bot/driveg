@@ -126,13 +126,13 @@ export default function MyDrivePage() {
     console.log('File clicked:', file.name)
   }
 
-  const handleFileAction = useCallback((file: UIFileItem, action: string) => {
+  const handleFileAction = (file: UIFileItem, action: string) => {
     if (action === 'remove') {
       void moveToTrash(file.id)
       return
     }
     console.log('File action:', action, file.name)
-  }, [moveToTrash])
+  }
 
   // Show nothing during hydration to prevent mismatch
   if (!isHydrated) {
