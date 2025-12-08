@@ -122,11 +122,6 @@ export default function MyDrivePage() {
 
   const dateColumnConfig = getDateColumnConfig()
 
-  // Show nothing during hydration to prevent mismatch
-  if (!isHydrated) {
-    return null
-  }
-
   const handleFileClick = (file: UIFileItem) => {
     console.log('File clicked:', file.name)
   }
@@ -138,6 +133,11 @@ export default function MyDrivePage() {
     }
     console.log('File action:', action, file.name)
   }, [moveToTrash])
+
+  // Show nothing during hydration to prevent mismatch
+  if (!isHydrated) {
+    return null
+  }
 
   return (
     <div className="h-full" onContextMenu={handleContextMenu}>
