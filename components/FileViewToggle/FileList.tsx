@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { 
   DocumentIcon, 
   FolderIcon, 
@@ -67,6 +67,37 @@ export default function FileList({
     resolvedActions.remove ||
     resolvedActions.restore ||
     resolvedActions.deleteForever
+
+  const [contextMenuState, setContextMenuState] = useState<{
+    file: FileItem
+    position: { x: number; y: number }
+  } | null>(null)
+
+  useEffect(() => {
+    if (!contextMenuState) return
+    const handleClick = () => setContextMenuState(null)
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setContextMenuState(null)
+      }
+    }
+    document.addEventListener('click', handleClick)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('click', handleClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [contextMenuState])
+
+  const contextMenuItems = contextMenuState ? getMenuItems(contextMenuState.file) : []
+
+  const openContextMenu = (event: React.MouseEvent, file: FileItem) => {
+    event.preventDefault()
+    setContextMenuState({
+      file,
+      position: { x: event.clientX, y: event.clientY },
+    })
+  }
 
   const getMenuItems = (file: FileItem) => {
     const items: Array<{ label: string; action: string; icon: React.ComponentType<{ className?: string }>; tone?: 'danger' | 'default' }> = []
@@ -164,6 +195,7 @@ export default function FileList({
         key={file.id}
         className="group border-b border-gray-300 transition-colors hover:bg-gray-200 cursor-pointer"
         onClick={() => handleFileClick(file)}
+        onContextMenu={(event) => openContextMenu(event, file)}
       >
         {showColumns.name && (
           <td className="px-4 py-1 min-w-0">
@@ -687,6 +719,34 @@ export default function FileList({
           )}
         </tbody>
       </table>
+      {contextMenuState && contextMenuItems.length > 0 && (
+        <div
+          className="fixed z-50 min-w-[200px] rounded-lg border border-gray-200 bg-white py-1 shadow-xl"
+          style={{
+            left: contextMenuState.position.x,
+            top: contextMenuState.position.y,
+          }}
+          onClick={(event) => event.stopPropagation()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {contextMenuItems.map((item) => (
+            <button
+              key={item.action}
+              className={`flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                item.tone === 'danger' ? 'text-red-600 hover:bg-red-50' : 'text-gray-700'
+              }`}
+              onClick={(event) => {
+                event.stopPropagation()
+                onFileAction?.(contextMenuState.file, item.action)
+                setContextMenuState(null)
+              }}
+            >
+              <item.icon className={`h-4 w-4 ${item.tone === 'danger' ? 'text-red-500' : 'text-gray-500'}`} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
