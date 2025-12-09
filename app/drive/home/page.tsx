@@ -1,7 +1,7 @@
 'use client'
 
 import { FileViewToggle, FileGrid, FileList, useViewMode } from '@/components/FileViewToggle'
-import type { FileItem } from '@/components/FileViewToggle'
+import type { FileItem as UIFileItem } from '@/components/FileViewToggle'
 import {
   DocumentTextIcon,
   TableCellsIcon,
@@ -9,186 +9,89 @@ import {
   VideoCameraIcon,
   FolderIcon,
 } from '@heroicons/react/24/outline'
-import { useEffect, useState } from 'react'
-import Image from "next/image";
+import { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
+import { useAppSelector } from '@/lib/hooks'
+import { selectAllFiles, selectCurrentUser } from '@/lib/selectors'
+import type { FileItem as DriveFile } from '@/lib/store/slices/driveSlice'
+import { useFileTrashActions } from '@/lib/hooks/useFileTrashActions'
 
-// Sample data for testing
-const sampleFiles: FileItem[] = [
-  {
-    id: '1',
-    name: '[RLGYM][DriveG] Task Split Sheet.xlsx',
-    type: 'file',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    icon: TableCellsIcon,
-    owner: {
-      name: 'Raghavendar Gunda',
-    },
-    createdTime: new Date().toISOString(),
-    modifiedTime: new Date().toISOString(),
-    size: '125 KB',
-    location: 'driveG',
-    reasonSuggested: 'Raghavendar Gunda created • 10:23 AM',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '2',
-    name: 'google_drive_ui_components.xlsx',
-    type: 'file',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    icon: TableCellsIcon,
-    owner: {
-      name: 'Raghavendar Gunda',
-    },
-    modifiedTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    size: '89 KB',
-    location: 'driveG',
-    reasonSuggested: 'You opened • 9:48 AM',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '3',
-    name: 'open table scenarios.mp4',
-    type: 'file',
-    mimeType: 'video/mp4',
-    icon: VideoCameraIcon,
-    owner: {
-      name: 'Raghavendar Gunda',
-    },
-    modifiedTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    size: '15.2 MB',
-    location: 'opentable',
-    reasonSuggested: 'You opened • Nov 27, 2025',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '4',
-    name: 'G_Drive_Modules_Final.xlsx',
-    type: 'file',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    icon: TableCellsIcon,
-    owner: {
-      name: 'Raghavendar Gunda',
-    },
-    modifiedTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    size: '234 KB',
-    location: 'driveG',
-    reasonSuggested: 'Raghavendar Gunda edited • Nov 27, 2025',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '5',
-    name: '[Turing RLGY] Woocommerce Task Split',
-    type: 'file',
-    mimeType: 'application/vnd.google-apps.document',
-    icon: DocumentTextIcon,
-    owner: {
-      name: 'Amante Diriba',
-    },
-    modifiedTime: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    size: '45 KB',
-    location: 'woocommerce',
-    reasonSuggested: 'Based on past activity',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '6',
-    name: '[RLGYM][OpenTable] Task Split Sheet',
-    type: 'file',
-    mimeType: 'application/vnd.google-apps.spreadsheet',
-    icon: TableCellsIcon,
-    owner: {
-      name: 'Amante Diriba',
-    },
-    modifiedTime: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    size: '112 KB',
-    location: 'opentable',
-    reasonSuggested: 'You opened • 9:47 AM',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '7',
-    name: 'Daily Sync- Open Table - 2025/11/26 19:44 GMT+05:30 - No...',
-    type: 'file',
-    mimeType: 'application/vnd.google-apps.document',
-    icon: DocumentTextIcon,
-    owner: {
-      name: 'Gunjan Madan',
-    },
-    modifiedTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    size: '78 KB',
-    location: 'Shared with me',
-    reasonSuggested: 'Gunjan Madan shared with you • Nov 26, 2025',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '8',
-    name: 'Google_Drive_Module_sample.xlsx',
-    type: 'file',
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    icon: TableCellsIcon,
-    owner: {
-      name: 'Raghavendar Gunda',
-    },
-    modifiedTime: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    size: '156 KB',
-    location: 'driveG',
-    reasonSuggested: 'Raghavendar Gunda edited • Nov 26, 2025',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '9',
-    name: 'Project Presentation',
-    type: 'file',
-    mimeType: 'application/vnd.google-apps.presentation',
-    icon: PresentationChartBarIcon,
-    owner: {
-      name: 'Gunjan Madan',
-    },
-    modifiedTime: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    size: '2.3 MB',
-    location: 'Shared with me',
-    reasonSuggested: 'Gunjan Madan shared with you • Nov 27, 2025',
-    fileSensitivity: 'Standard',
-  },
-  {
-    id: '10',
-    name: 'Design Assets',
-    type: 'folder',
-    icon: FolderIcon,
-    owner: {
-      name: 'me',
-    },
-    modifiedTime: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    location: 'My Drive',
-    reasonSuggested: 'You opened • Nov 24, 2025',
-    fileSensitivity: 'Standard',
-  },
-]
+const formatSize = (size?: number) => {
+  if (!size) return undefined
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`
+  return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`
+}
+
+const resolveIcon = (file: DriveFile) => {
+  if (file.type === 'folder') return FolderIcon
+  const mime = file.mimeType || ''
+  if (mime.includes('presentation')) return PresentationChartBarIcon
+  if (mime.includes('spreadsheet') || mime.includes('excel')) return TableCellsIcon
+  if (mime.includes('video')) return VideoCameraIcon
+  if (mime.includes('document') || mime.includes('word')) return DocumentTextIcon
+  return DocumentTextIcon
+}
 
 export default function HomePage() {
   const [viewMode, setViewMode] = useViewMode('list')
   const [isHydrated, setIsHydrated] = useState(false)
+  const reduxFiles = useAppSelector(selectAllFiles)
+  const currentUser = useAppSelector(selectCurrentUser)
+  const { moveToTrash } = useFileTrashActions()
 
   useEffect(() => {
     setIsHydrated(true)
   }, [])
+
+  const suggestedFiles = useMemo<UIFileItem[]>(() => {
+    return reduxFiles
+      .filter((file) => !file.isTrashed)
+      .slice(0, 12)
+      .map((file) => ({
+        id: file.id,
+        name: file.name,
+        type: file.type === 'folder' ? 'folder' : 'file',
+        mimeType: file.mimeType,
+        icon: resolveIcon(file),
+        owner: {
+          name: currentUser?.name || file.createdBy,
+        },
+        modifiedTime: file.modifiedAt,
+        createdTime: file.createdAt,
+        size: file.type === 'folder' ? '-' : formatSize(file.size),
+        location: file.parentId ? 'Folder' : 'My Drive',
+        reasonSuggested: file.modifiedBy
+          ? `${file.modifiedBy} updated • ${new Date(file.modifiedAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+            })}`
+          : undefined,
+        fileSensitivity: 'Standard',
+      }))
+  }, [reduxFiles, currentUser])
+
+  const handleFileClick = (file: UIFileItem) => {
+    console.log('File clicked:', file.name)
+  }
+
+  const handleFileAction = (file: UIFileItem, action: string) => {
+    if (action === 'remove') {
+      void moveToTrash(file.id)
+      return
+    }
+    console.log('File action:', action, file.name)
+  }
 
   // Show nothing during hydration to prevent mismatch
   if (!isHydrated) {
     return null
   }
 
-  const handleFileClick = (file: FileItem) => {
-    console.log('File clicked:', file.name)
-  }
-
-  const handleFileAction = (file: FileItem, action: string) => {
-    console.log('File action:', action, file.name)
-  }
-
   return (
     <>
-      {sampleFiles.length > 0 ? (
+      {suggestedFiles.length > 0 ? (
         <div className="p-8">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-2xl font-semibold text-gray-900">Suggested files</h1>
@@ -196,15 +99,17 @@ export default function HomePage() {
           </div>
           {viewMode === 'grid' ? (
             <FileGrid
-              files={sampleFiles}
+              files={suggestedFiles}
               onFileClick={handleFileClick}
               onFileAction={handleFileAction}
+              actionConfig={{ remove: true }}
             />
           ) : (
             <FileList
-              files={sampleFiles}
+              files={suggestedFiles}
               onFileClick={handleFileClick}
               onFileAction={handleFileAction}
+              actionConfig={{ remove: true }}
               showColumns={{
                 name: true,
                 reason: true,
