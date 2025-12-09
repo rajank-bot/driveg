@@ -1,9 +1,17 @@
 'use client'
 
-import React from 'react'
-import { DocumentIcon, FolderIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline'
+import React, { useEffect, useMemo, useState } from 'react'
+import {
+  DocumentIcon,
+  FolderIcon,
+  EllipsisVerticalIcon,
+  TrashIcon,
+  ArrowUturnLeftIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { SortPanel } from '@/components/SortPanel'
 import type { FileGridProps, FileItem } from '@/types/fileViewToggle'
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 
 export default function FileGrid({
   files,
@@ -21,7 +29,61 @@ export default function FileGrid({
   showFoldersSection = true,
   sortPanelOpen,
   onSortPanelOpenChange,
+  actionConfig,
 }: FileGridProps) {
+  const resolvedActions = useMemo(() => ({
+    share: false,
+    download: false,
+    rename: false,
+    star: false,
+    remove: false,
+    restore: false,
+    deleteForever: false,
+    ...(actionConfig || {}),
+  }), [actionConfig])
+
+  const [contextMenuState, setContextMenuState] = useState<{
+    file: FileItem
+    position: { x: number; y: number }
+  } | null>(null)
+
+  useEffect(() => {
+    if (!contextMenuState) return
+    const handleClick = () => setContextMenuState(null)
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setContextMenuState(null)
+    }
+    document.addEventListener('click', handleClick)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('click', handleClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [contextMenuState])
+
+  const openContextMenu = (event: React.MouseEvent, file: FileItem) => {
+    event.preventDefault()
+    setContextMenuState({
+      file,
+      position: { x: event.clientX, y: event.clientY },
+    })
+  }
+
+  const menuItems = useMemo(() => {
+    const items: Array<{ label: string; action: string; icon: React.ComponentType<{ className?: string }>; tone?: 'danger' | 'default' }> = []
+    if (resolvedActions.remove) {
+      items.push({ label: 'Move to trash', action: 'remove', icon: TrashIcon })
+    }
+    if (resolvedActions.restore) {
+      items.push({ label: 'Restore', action: 'restore', icon: ArrowUturnLeftIcon })
+    }
+    if (resolvedActions.deleteForever) {
+      items.push({ label: 'Delete forever', action: 'deleteForever', icon: XMarkIcon, tone: 'danger' })
+    }
+    return items
+  }, [resolvedActions])
+  const contextMenuItems = contextMenuState ? menuItems : []
+
   const getFileIcon = (file: FileItem) => {
     if (file.icon) {
       const Icon = file.icon
@@ -76,26 +138,112 @@ export default function FileGrid({
       key={file.id}
       className="group relative flex flex-col rounded-lg border-2 border-gray-300 bg-slate-100 p-3 transition-all hover:border-gray-300 hover:bg-gray-200 cursor-pointer"
       onClick={() => handleFileClick(file)}
+      onContextMenu={(event) => openContextMenu(event, file)}
     >
       {/* File Name - Top with padding for three dot icon (in gray area) */}
       <div className="w-full text-center mb-2 pr-8">
         <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
       </div>
 
-      {/* Three dots icon - always visible */}
-      <div className="absolute right-2 top-2 z-10">
+      {/* Quick actions - always accessible in grid */}
+      <div className="absolute right-2 top-2 z-10 flex flex-col items-end gap-1">
+        {resolvedActions.remove && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'remove')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Move to trash"
+            >
+              <TrashIcon className="h-5 w-5 text-gray-700" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Move to trash
+            </span>
+          </div>
+        )}
+
+        {resolvedActions.restore && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'restore')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Restore"
+            >
+              <ArrowUturnLeftIcon className="h-5 w-5 text-gray-700" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Restore
+            </span>
+          </div>
+        )}
+
+        {resolvedActions.deleteForever && (
+          <div className="relative group/icon">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onFileAction?.(file, 'deleteForever')
+              }}
+              className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+              aria-label="Delete forever"
+            >
+              <XMarkIcon className="h-5 w-5 text-red-600" />
+            </button>
+            <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+              Delete forever
+            </span>
+          </div>
+        )}
+
         <div className="relative group/icon">
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onFileAction?.(file, 'more')
-            }}
-            className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
-            aria-label="More options"
-          >
-            <EllipsisVerticalIcon className="h-5 w-5 text-gray-700" />
-          </button>
-          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                }}
+                className="rounded-full p-1.5 transition-colors hover:bg-gray-200"
+                aria-label="More options"
+              >
+                <EllipsisVerticalIcon className="h-5 w-5 text-gray-700" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                className="z-50 min-w-[180px] rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none"
+                side="bottom"
+                align="end"
+                sideOffset={8}
+              >
+                {menuItems.length > 0 ? (
+                  menuItems.map((item) => (
+                    <DropdownMenu.Item
+                      key={item.action}
+                      className={`flex cursor-pointer items-center gap-3 rounded px-3 py-2 text-sm text-gray-700 outline-none data-[highlighted]:bg-gray-100 ${
+                        item.tone === 'danger' ? 'text-red-600 data-[highlighted]:bg-red-50' : ''
+                      }`}
+                      onSelect={(event) => {
+                        event.preventDefault()
+                        onFileAction?.(file, item.action)
+                      }}
+                    >
+                      <item.icon className={`h-4 w-4 ${item.tone === 'danger' ? 'text-red-600' : 'text-gray-600'}`} />
+                      <span>{item.label}</span>
+                    </DropdownMenu.Item>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-sm text-gray-400">No actions available</div>
+                )}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+          <span className="absolute right-full top-1/2 -translate-y-1/2 mr-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap opacity-0 pointer-events-none transition-opacity group-hover/icon:opacity-100 z-50">
             More options
           </span>
         </div>
@@ -208,6 +356,36 @@ export default function FileGrid({
       ) : (
         <div className={`grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 ${className}`}>
           {files.map((file) => renderFileCard(file))}
+        </div>
+      )}
+      {contextMenuState && contextMenuItems.length > 0 && (
+        <div
+          className="fixed z-50 min-w-[200px] rounded-lg border border-gray-200 bg-white py-1 shadow-xl"
+          style={{
+            left: contextMenuState.position.x,
+            top: contextMenuState.position.y,
+          }}
+          onClick={(event) => event.stopPropagation()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {contextMenuItems.map((item) => (
+            <button
+              key={item.action}
+              className={`flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-gray-100 ${
+                item.tone === 'danger' ? 'text-red-600 hover:bg-red-50' : 'text-gray-700'
+              }`}
+              onClick={(event) => {
+                event.stopPropagation()
+                if (contextMenuState) {
+                  onFileAction?.(contextMenuState.file, item.action)
+                }
+                setContextMenuState(null)
+              }}
+            >
+              <item.icon className={`h-4 w-4 ${item.tone === 'danger' ? 'text-red-500' : 'text-gray-500'}`} />
+              <span>{item.label}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>

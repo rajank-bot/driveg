@@ -46,7 +46,7 @@ interface PersistedState {
       sizeMax?: number;
       mimeType?: string;
       starred?: boolean;
-      trashed?: boolean;
+      isTrashed?: boolean;
       shared?: boolean;
     };
     recentSearches: string[];

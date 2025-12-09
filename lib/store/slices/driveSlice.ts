@@ -13,7 +13,8 @@ export interface FileItem {
   createdBy: string;
   modifiedBy: string;
   starred?: boolean;
-  trashed?: boolean;
+  isTrashed?: boolean;
+  trashedAt?: string | null;
   shared?: boolean;
   permissions?: {
     canView: boolean;
@@ -75,7 +76,8 @@ export const driveSlice = createSlice({
       action.payload.forEach((id) => {
         const file = state.files.find((f) => f.id === id);
         if (file) {
-          file.trashed = true;
+          file.isTrashed = true;
+          file.trashedAt = new Date().toISOString();
         }
       });
       state.selectedItems = [];
@@ -84,7 +86,8 @@ export const driveSlice = createSlice({
       action.payload.forEach((id) => {
         const file = state.files.find((f) => f.id === id);
         if (file) {
-          file.trashed = false;
+          file.isTrashed = false;
+          file.trashedAt = null;
         }
       });
     },

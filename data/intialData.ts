@@ -13,7 +13,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Raghavendar Gunda",
     modifiedBy: "Raghavendar Gunda",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -34,7 +35,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Raghavendar Gunda",
     modifiedBy: "Raghavendar Gunda",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -55,7 +57,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Raghavendar Gunda",
     modifiedBy: "Raghavendar Gunda",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -76,7 +79,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Raghavendar Gunda",
     modifiedBy: "Raghavendar Gunda",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -97,7 +101,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Amante Diriba",
     modifiedBy: "Amante Diriba",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: true,
     permissions: {
       canView: true,
@@ -118,7 +123,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Amante Diriba",
     modifiedBy: "Amante Diriba",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -139,7 +145,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Gunjan Madan",
     modifiedBy: "Gunjan Madan",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: true,
     permissions: {
       canView: true,
@@ -160,7 +167,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Raghavendar Gunda",
     modifiedBy: "Raghavendar Gunda",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,
@@ -181,7 +189,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "Gunjan Madan",
     modifiedBy: "Gunjan Madan",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: true,
     permissions: {
       canView: true,
@@ -200,7 +209,8 @@ export const sampleFiles: FileItem[] = [
     createdBy: "me",
     modifiedBy: "me",
     starred: false,
-    trashed: false,
+    isTrashed: false,
+    trashedAt: null,
     shared: false,
     permissions: {
       canView: true,

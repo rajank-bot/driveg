@@ -62,7 +62,8 @@ export const uploadFile = createAsyncThunk<
                 createdBy: "current-user",
                 modifiedBy: "current-user",
                 starred: false,
-                trashed: false,
+              isTrashed: false,
+              trashedAt: null,
                 shared: false,
               };
 

@@ -64,7 +64,8 @@ export const createFile = createAsyncThunk<
       createdBy: fileData.createdBy || "current-user",
       modifiedBy: fileData.modifiedBy || "current-user",
       starred: false,
-      trashed: false,
+      isTrashed: false,
+      trashedAt: null,
       shared: false,
       ...fileData,
     };
