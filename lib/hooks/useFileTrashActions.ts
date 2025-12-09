@@ -86,6 +86,16 @@ export function useFileTrashActions() {
   const deleteForever = useCallback(
     async (ids: string | string[]) => {
       const fileIds = normalizeIds(ids);
+      if (typeof window !== "undefined") {
+        const message =
+          fileIds.length > 1
+            ? `Permanently delete ${fileIds.length} items? This action cannot be undone.`
+            : "Permanently delete this item? This action cannot be undone.";
+        const confirmed = window.confirm(message);
+        if (!confirmed) {
+          return;
+        }
+      }
       await runAction(
         "delete",
         async () => {
